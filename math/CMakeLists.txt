@@ -1,1 +1,0 @@
-add_library(math vec3.cpp)
