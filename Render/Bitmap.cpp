@@ -3,10 +3,10 @@
 #include <iostream>
 #include <fstream>
 
-void Bitmap::Fill(const BitmapColor& color)
+void Bitmap::Fill(const Color& color)
 {
-	for (auto&& pixel : data)
-		pixel = color;
+    for (auto&& pixel : data)
+        pixel = toUint8RGB(color);
 }
 
 bool Bitmap::SaveFile(const std::string& path) const
@@ -49,7 +49,7 @@ bool Bitmap::SaveFile(const std::string& path) const
         out.close();
         return false;
     }
-
+    std::uint8_t B, G, R;
     for (int y = 0; y < height(); y++)
     {
         uint32_t padding = pitch - width() * pixelsize;

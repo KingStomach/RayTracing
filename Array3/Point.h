@@ -6,7 +6,7 @@
 class Point : public Array3
 {
 public:
-	Point(float x = 0.0, float y = 0.0, float z = 0.0) : Array3(x, y, z) {}
+	explicit Point(float x = 0.0, float y = 0.0, float z = 0.0) : Array3(x, y, z) {}
 	Point(const Array3& arr) : Array3(arr) {}
 
 	inline float x() { return data[0]; }
