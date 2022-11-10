@@ -15,8 +15,8 @@ int main(void)
 {
 	Bitmap framebuff(width, height);
 
-	Sphere s(Point(0.0, 0.0, -10.0), 1.0, Red);
-	Camera c(Point(0.0, 0.0, 0.0), Vec3(-1.0, 0.0, 0.0), Vec3(1.0, 0.0, 0.0));
+	Sphere s(Point(0.0, 0.0, -10.0), 1.5, Red);
+	Camera c(Point(0.0, 0.0, 0.0), Vec3(0.0, 0.0, -1.0), Vec3(0.0, 1.0, 0.0), 45.0, aspect_ratio);
 	HitRecord record{ Vec3(0.0, 0.0, 0.0), Vec3(0.0, 0.0, 0.0) };
 
 
@@ -27,11 +27,12 @@ int main(void)
 	{
 		for (int j = 0; j < height; ++j)
 		{
+			Ray ray = c.sample(((float)i + 0.5) / width, ((float)j + 0.5) / height);
 			//Vec3 dir((((float)i + 0.5) / (float)width - 0.5) * 2.0, (((float)j + 0.5) / (float)height - 0.5) * 2.0, 2.0);
-			Point pixel(((float)i + 0.5) * xstep + xmin, ((float)j + 0.5) * ystep + ymin, -1.0);
-			Vec3 dir = pixel - c.position();
-			dir.normalize();
-			Ray ray(c.position(), dir);
+			//Point pixel(((float)i + 0.5) * xstep + xmin, ((float)j + 0.5) * ystep + ymin, -1.0);
+			//Vec3 dir = pixel - c.position();
+			//dir.normalize();
+			//Ray ray(c.position(), dir);
 			if (s.hit(ray, record))
 			{
 				framebuff.SetPixel(i, j, s.color());
