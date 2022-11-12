@@ -10,7 +10,7 @@ public:
 
 	inline Point origin() const { return p; }
 	inline Vec3 direction() const { return d; }
-	inline Point at(float t) { return p + d * t; }
+	inline Point at(float t) const { return p + d * t; }
 
 private:
 	Point p;

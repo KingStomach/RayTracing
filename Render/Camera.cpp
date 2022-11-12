@@ -1,7 +1,7 @@
 #include "Camera.h"
 
 Camera::Camera(const Point& position, const Vec3& lookat, const Vec3& up, float fov, float aspect_ratio)
-	: p(position), lookat(lookat), up(up), yoffset(-std::tan(fov / 2.0)), xoffset(yoffset* aspect_ratio){}
+	: p(position), lookat(lookat), up(up), yoffset(std::tan(fov / 2.0)), xoffset(yoffset* aspect_ratio){}
 
 Ray Camera::sample(float s, float v)
 {

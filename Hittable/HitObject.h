@@ -9,6 +9,7 @@ struct HitRecord
 {
 	Point position;
 	Vec3 normal;
+	float t;
 };
 
 class HitObject

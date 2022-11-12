@@ -20,7 +20,7 @@ public:
 	inline Vec3 operator*(float x) const { return Array3::operator*(x); }
 	inline friend Vec3 operator*(float x, const Vec3& v) { return v * x; }
 	inline float Dot(const Vec3& v) const { return data[0] * v.data[0] + data[1] * v.data[1] + data[2] * v.data[2]; }
-	inline void normalize() { *this*= (1.0 / std::sqrt(this->Dot(*this))); }
+	inline const Vec3& normalize() { *this *= (1.0 / std::sqrt(this->Dot(*this))); return *this; }
 	inline Vec3 cross(const Vec3& v) { return Vec3(data[1] * v.data[2] - data[2] * v.data[1], data[2] * v.data[0] - data[0] * v.data[2], data[0] * v.data[1] - data[1] * v.data[0]); }
 };
 
