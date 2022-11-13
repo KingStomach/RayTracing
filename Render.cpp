@@ -1,7 +1,9 @@
-#include "Bitmap.h"
+#include "Render.h"
 
 #include <iostream>
 #include <fstream>
+
+#include "HitObject.h"
 
 void Bitmap::Fill(const Color& color)
 {
@@ -68,4 +70,17 @@ bool Bitmap::SaveFile(const std::string& path) const
 
     out.close();
     return true;
+}
+
+Camera::Camera(const Point& position, const Vec3& lookat, const Vec3& up, float fov, float aspect_ratio)
+    : p(position), lookat(lookat), up(up), yoffset(std::tan(fov * PI /360.0)), xoffset(yoffset* aspect_ratio) {}
+
+Ray Camera::sample(float s, float v)
+{
+    Vec3 dir = lookat - p;
+    dir.normalize();
+    Vec3 offset = (s - 0.5) * xoffset * (up.cross(dir)) + (v - 0.5) * yoffset * up;
+    dir = dir + offset;
+    dir.normalize();
+    return Ray(p, dir);
 }

@@ -1,11 +1,13 @@
-#ifndef _BITMAP_H_
-#define _BITMAP_H_
+#ifndef _RENDER_H_
+#define _RENDER_H_
 
 #include <array>
 #include <string>
 #include <vector>
 
-#include "../Array3/Color.h"
+#include "Array3.h"
+
+class Ray;
 
 class Bitmap
 {
@@ -42,10 +44,29 @@ private:
 
     inline int getIndex(int x, int y) const { return x * h + y; }
     inline float clamp(float x) const { return std::min(std::max(x, 0.0f), 1.0f); }
-    inline std::array<std::uint8_t, 3> toUint8RGB(const Color& color) { return std::array<std::uint8_t, 3>{
-        static_cast<std::uint8_t>(255.0 * clamp(color.b()) + 0.5),
-        static_cast<std::uint8_t>(255.0 * clamp(color.g()) + 0.5),
-        static_cast<std::uint8_t>(255.0 * clamp(color.r()) + 0.5) }; }
+    inline std::array<std::uint8_t, 3> toUint8RGB(const Color& color) {
+        return std::array<std::uint8_t, 3>{
+            static_cast<std::uint8_t>(255.0 * clamp(color.b()) + 0.5),
+                static_cast<std::uint8_t>(255.0 * clamp(color.g()) + 0.5),
+                static_cast<std::uint8_t>(255.0 * clamp(color.r()) + 0.5) };
+    }
+};
+
+class Camera
+{
+public:
+    Camera(const Point& position, const Vec3& lookat, const Vec3& up, float fov, float aspect_ratio);
+
+    inline Point position() const { return p; }
+
+    Ray sample(float s, float v);
+
+private:
+    Point p;
+    Vec3 lookat;
+    Vec3 up;
+    float yoffset;
+    float xoffset;
 };
 
 #endif
