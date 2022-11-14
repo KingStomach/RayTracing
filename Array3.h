@@ -24,11 +24,14 @@ protected:
 	inline Array3 operator+(const Array3& arr) const { return Array3(data[0] + arr.data[0], data[1] + arr.data[1], data[2] + arr.data[2]); }
 	inline Array3 operator+=(const Array3& arr) { data[0] += arr.data[0]; data[1] += arr.data[1]; data[2] += arr.data[2]; return *this; }
 	inline Array3 operator-(const Array3& arr) const { return Array3(data[0] - arr.data[0], data[1] - arr.data[1], data[2] - arr.data[2]); }
+	inline Array3 operator-() const { return Array3(-data[0], -data[1], -data[2]); }
 	inline Array3 operator*(const Array3& arr) const { return Array3(data[0] * arr.data[0], data[1] * arr.data[1], data[2] * arr.data[2]); }
 	inline Array3 operator*(float x) const { return Array3(data[0] * x, data[1] * x, data[2] * x); }
 	inline Array3 operator*=(float x) { data[0] *= x; data[1] *= x; data[2] *= x; return *this; }
 	inline Array3 operator/(float x) const { return Array3(data[0] / x, data[1] / x, data[2] / x); }
 	inline Array3 operator/=(float x) { data[0] /= x; data[1] /= x; data[2] /= x; return *this; }
+	inline Array3 operator^(float x) const { return Array3(std::pow(data[0], x), std::pow(data[1], x), std::pow(data[2], x)); }
+	inline Array3 operator^=(float x) { data[0] = std::pow(data[0], x), data[1] = std::pow(data[1], x), data[2] = std::pow(data[2], x); return *this; }
 
 	float data[3];
 };
@@ -45,11 +48,13 @@ public:
 
 	inline Vec3 operator+(const Vec3& v) const { return Array3::operator+(v); }
 	inline Vec3 operator-(const Vec3& v) const { return Array3::operator-(v); }
+	inline Vec3 operator-() const { return Array3::operator-(); }
 	inline Vec3 operator*(float x) const { return Array3::operator*(x); }
 	inline friend Vec3 operator*(float x, const Vec3& v) { return v * x; }
 	inline float Dot(const Vec3& v) const { return data[0] * v.data[0] + data[1] * v.data[1] + data[2] * v.data[2]; }
 	inline const Vec3& normalize() { *this *= (1.0 / std::sqrt(this->Dot(*this))); return *this; }
 	inline Vec3 cross(const Vec3& v) { return Vec3(data[1] * v.data[2] - data[2] * v.data[1], data[2] * v.data[0] - data[0] * v.data[2], data[0] * v.data[1] - data[1] * v.data[0]); }
+
 	inline static Vec3 random_sphere()
 	{
 		float theta = random_float() * PI, phi = random_float() * PI * 2.0;
@@ -57,12 +62,11 @@ public:
 	}
 	inline static Vec3 random_hemisphere(const Vec3& v)
 	{	
-		Vec3 res;
-		do
-		{
-			res = random_sphere();
-		} while (res.Dot(v) < 0.0);
-		return res;
+		Vec3 res = random_sphere();
+		if (res.Dot(v) > 0.0)
+			return res;
+		else
+			return -res;
 	}
 };
 
@@ -95,9 +99,11 @@ public:
 	inline Color operator-(const Color& v) const { return Array3::operator-(v); }
 	inline Color operator*(const Color& v) const { return Array3::operator*(v); }
 	inline Color operator*(float x) const { return Array3::operator*(x); }
+	inline friend Color operator*(float x, const Color& v) { return v * x; }
 	inline Color operator/(float x) const { return Array3::operator/(x); }
 	inline Color operator/=(float x) { return Array3::operator/=(x); }
-	inline friend Color operator*(float x, const Color& v) { return v * x; }
+	inline Color operator^(float x) const { return Array3::operator^(x); }
+	inline Color operator^=(float x) { return Array3::operator^=(x); }
 };
 
 const Color White(1.0, 1.0, 1.0);

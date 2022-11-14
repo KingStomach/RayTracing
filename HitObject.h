@@ -2,7 +2,8 @@
 #define _HITOBJECT_H_
 
 #include "Array3.h"
-#include "Material.h"
+
+class Material;
 
 struct HitRecord
 {
@@ -30,12 +31,19 @@ class HitObject
 public:
 	virtual bool hit(const Ray& ray, HitRecord& record) const = 0;
 
+	std::shared_ptr<Material> material() const { return m; }
+
+protected:
+	HitObject(const std::shared_ptr<Material>& material) : m(material) {}
+
+private:
+	std::shared_ptr<Material> m;
 };
 
 class Sphere : public HitObject
 {
 public:
-	Sphere(Point center, float radius) : o(center), r(radius) {}
+	Sphere(const Point& center, float radius, const std::shared_ptr<Material>& material) : o(center), r(radius), HitObject(material) {}
 
 	bool hit(const Ray& ray, HitRecord& record) const override;
 
