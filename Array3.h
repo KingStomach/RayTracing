@@ -68,6 +68,7 @@ public:
 		else
 			return -res;
 	}
+	inline static Vec3 reflect(const Vec3& in, const Vec3& normal) { return in - 2.0 * in.Dot(normal) * normal; }
 };
 
 class Point : public Array3
