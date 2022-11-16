@@ -22,11 +22,12 @@ private:
 class Metal : public Material
 {
 public:
-	Metal(const Color& albedo) : albedo(albedo) {}
+	Metal(const Color& albedo, float fuzz) : albedo(albedo), fuzz(fuzz) {}
 
 	bool scatter(const Ray& in, const HitRecord& record, Color& attenuation, Ray& out) const override;
 private:
 	Color albedo;
+	float fuzz;
 };
 
 
