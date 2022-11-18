@@ -28,12 +28,15 @@ bool Sphere::hit(const Ray& ray, float min, float max, HitRecord& record) const
 		return false;
 	double t = std::sqrt(delta);
 	double t1 = (-b - t) * 0.5f / a;
+	if (t1 < min)
+		t1 = (-b + t) * 0.5f / a;
 	if (t1 < min || t1 > max)
 		return false;
 
 	record.t = t1;
 	record.position = ray.at(t1);
 	record.normal = (record.position - o).normalize();
+	record.isfront = record.normal.Dot(ray.direction()) < 0.0f;
 	return true;
 }
 

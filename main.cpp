@@ -9,7 +9,7 @@
 
 const int width = 1024;
 const int height = 768;
-const float fov = 45.0;
+const float fov = 45.0f;
 const float aspect_ratio = (float)width / height;
 
 Color RayTrace(const Ray& in,const Scene& scene, int depth)
@@ -18,7 +18,7 @@ Color RayTrace(const Ray& in,const Scene& scene, int depth)
 		return Black;
 
 	HitRecord record;
-	if (scene.hit(in, 0.001, std::numeric_limits<float>::infinity(), record))
+	if (scene.hit(in, 0.001f, std::numeric_limits<float>::infinity(), record))
 	{
 		Ray out(in);
 		Color attenuation;
@@ -29,8 +29,8 @@ Color RayTrace(const Ray& in,const Scene& scene, int depth)
 	}
 	else
 	{
-		float t = 0.5 * (in.direction().y() + 1.0);
-		return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);
+		float t = 0.5f * (in.direction().y() + 1.0f);
+		return (1.0f - t) * Color(1.0f, 1.0f, 1.0f) + t * Color(0.5f, 0.7f, 1.0f);
 	}
 
 }
@@ -38,18 +38,18 @@ Color RayTrace(const Ray& in,const Scene& scene, int depth)
 int main(void)
 {
 	Bitmap framebuff(width, height);
-	Camera camera(Point(0.0, 0.0, 1.0), Vec3(0.0, 0.0, -1.0), Vec3(0.0, 1.0, 0.0), 90.0, aspect_ratio);
+	Camera camera(Point(0.0f, 0.0f, 1.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(0.0f, 1.0f, 0.0f), 90.0f, aspect_ratio);
 
-	auto material_ground = std::make_shared<Diffuse>(Color(0.8, 0.8, 0.0));
-	auto material_center = std::make_shared<Diffuse>(Color(0.7, 0.3, 0.3));
-	auto material_left = std::make_shared<Metal>(Color(0.8, 0.8, 0.8), 0.3);
-	auto material_right = std::make_shared<Metal>(Color(0.8, 0.6, 0.2), 1.0);
+	auto material_ground = std::make_shared<Diffuse>(Color(0.8f, 0.8f, 0.0f));
+	auto material_center = std::make_shared<Diffuse>(Color(0.1f, 0.2f, 0.5f));
+	auto material_left = std::make_shared<Dielectric>(1.5f);
+	auto material_right = std::make_shared<Metal>(Color(0.8f, 0.6f, 0.2f), 0.0f);
 
 	Scene scene;
-	scene.addObject(std::make_shared<Sphere>(Point(0.0, -100.5, -1.0), 100, material_ground));
-	scene.addObject(std::make_shared<Sphere>(Point(0.0, 0.0, -1.0), 0.5, material_center));
-	scene.addObject(std::make_shared<Sphere>(Point(1.0, 0.0, -1.0), 0.5, material_left));
-	scene.addObject(std::make_shared<Sphere>(Point(-1.0, 0.0, -1.0), 0.5, material_right));
+	scene.addObject(std::make_shared<Sphere>(Point(0.0f, -100.5f, -1.0f), 100.0f, material_ground));
+	scene.addObject(std::make_shared<Sphere>(Point(0.0f, 0.0f, -1.0f), 0.5f, material_center));
+	scene.addObject(std::make_shared<Sphere>(Point(1.0f, 0.0f, -1.0f), 0.5f, material_left));
+	scene.addObject(std::make_shared<Sphere>(Point(-1.0f, 0.0f, -1.0f), 0.5f, material_right));
 
 	clock_t a = clock();
 	
@@ -69,8 +69,8 @@ int main(void)
 
 				{
 					std::lock_guard<std::mutex> lock(mutex);
-					color /= 10.0;
-					color ^= (1.0 / 2.2);
+					color /= 10.0f;
+					color ^= (1.0f / 2.2f);
 					framebuff.SetPixel(i, j, color);
 				}
 			}

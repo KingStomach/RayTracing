@@ -14,3 +14,21 @@ bool Metal::scatter(const Ray& in, const HitRecord& record, Color& attenuation, 
 	attenuation = albedo;
 	return out.direction().Dot(record.normal) > 0;
 }
+
+bool Dielectric::scatter(const Ray& in, const HitRecord& record, Color& attenuation, Ray& out) const
+{
+	Vec3 normal = record.isfront ? record.normal : -record.normal;
+	float cos_theta = -normal.Dot(in.direction());
+	float sin_theta = std::sqrt(1.0f - cos_theta * cos_theta);
+	float refraction_index = record.isfront ? (1.0f / ir) : ir;
+	Vec3 out_direction;
+	if (refraction_index * sin_theta > 1.0f || reflectance(cos_theta, refraction_index)> random_float())
+	//if (refraction_index * sin_theta > 1.0f)
+		out_direction = Vec3::reflect(in.direction(), normal);
+	else
+		out_direction = Vec3::refract(in.direction(), normal, refraction_index);
+
+	out = Ray(record.position, out_direction);
+	attenuation = Color(1.0f, 1.0f, 1.0f);
+	return true;
+}

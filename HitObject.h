@@ -11,6 +11,7 @@ struct HitRecord
 	Point position;
 	Vec3 normal;
 	float t;
+	bool isfront;
 	std::shared_ptr<HitObject> object;
 };
 
