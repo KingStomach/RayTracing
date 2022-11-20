@@ -41,9 +41,9 @@ private:
 
 	inline static float reflectance(float cos_theta, float refraction_index)
 	{
-		float r0 = (1.0f - refraction_index) / (1.0f + refraction_index);
+		float r0 = (refraction_index - 1.0f) / (refraction_index + 1.0f);
 		r0 = r0 * r0;
-		return r0 + (1 - r0) * std::pow((1 - cos_theta), 5);
+		return r0 + (1.0f - r0) * std::pow((1 - cos_theta), 5);
 	}
 };
 

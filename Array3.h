@@ -5,11 +5,11 @@
 #include <functional>
 #include <random>
 
-#define PI 3.1415926
+#define PI 3.1415926f
 
-inline float random_float()
+inline float random_float(float min = 0.0f, float max = 1.0f)
 {
-	static std::uniform_real_distribution<float> distribution(0.0f, 1.0f);
+	static std::uniform_real_distribution<float> distribution(min, max);
 	static std::mt19937 generator;
 	static std::function<float()> rand_generator =
 		std::bind(distribution, generator);
@@ -47,6 +47,7 @@ public:
 	inline float z() { return data[2]; }
 
 	inline Vec3 operator+(const Vec3& v) const { return Array3::operator+(v); }
+	inline Vec3 operator+=(const Vec3& v) { return Array3::operator+=(v); }
 	inline Vec3 operator-(const Vec3& v) const { return Array3::operator-(v); }
 	inline Vec3 operator-() const { return Array3::operator-(); }
 	inline Vec3 operator*(float x) const { return Array3::operator*(x); }
@@ -58,16 +59,21 @@ public:
 
 	inline static Vec3 random_sphere()
 	{
-		float theta = random_float() * PI, phi = random_float() * PI * 2.0f;
+		float theta = random_float(0.0f, PI), phi = random_float(0.0f, PI * 2.0f);
 		return Vec3(std::cos(theta) * std::cos(phi), std::cos(theta) * std::sin(phi), std::sin(theta));
 	}
 	inline static Vec3 random_hemisphere(const Vec3& v)
 	{	
 		Vec3 res = random_sphere();
-		if (res.Dot(v) > 0.0)
+		if (res.Dot(v) > 0.0f)
 			return res;
 		else
 			return -res;
+	}
+	inline static Vec3 random_unit_disk()
+	{
+		float theta = random_float(0.0f, PI * 2.0f), l = random_float();
+		return Vec3(l * std::cos(theta), l * std::sin(theta), 0.0f);
 	}
 	inline static Vec3 reflect(const Vec3& in, const Vec3& normal) { return in - 2.0f * in.Dot(normal) * normal; }
 	inline static Vec3 refract(const Vec3& in, const Vec3& normal, float ir_ratio)
@@ -77,10 +83,6 @@ public:
 		Vec3 vertical = -cos_theta2 * normal;
 		Vec3 horizontal = sin_theta2 * (in + cos_theta1 * normal).normalize();
 		return vertical + horizontal;
-
-		//Vec3 vertical = ir_ratio * (in + std::min(-in.Dot(normal), 1.0f) * normal);
-		//Vec3 horizontal = -std::sqrt(1.0f - vertical.length()) * normal;
-		//return vertical + horizontal;
 	}
 };
 
@@ -118,6 +120,8 @@ public:
 	inline Color operator/=(float x) { return Array3::operator/=(x); }
 	inline Color operator^(float x) const { return Array3::operator^(x); }
 	inline Color operator^=(float x) { return Array3::operator^=(x); }
+
+	static Color random(float min = 0.0f, float max = 1.0f) { return Color(random_float(min, max), random_float(min, max), random_float(min, max)); }
 };
 
 const Color White(1.0f, 1.0f, 1.0f);

@@ -58,6 +58,7 @@ public:
     Camera(const Point& position, const Vec3& lookat, const Vec3& up, float fov, float aspect_ratio);
 
     inline Point position() const { return p; }
+    inline void setLen(float aperture, float focus_dist) { this->lens_radius = aperture / 2.0f; this->focus_dist = focus_dist; }
 
     Ray sample(float s, float v);
 
@@ -67,6 +68,8 @@ private:
     Vec3 up;
     float yoffset;
     float xoffset;
+    float lens_radius;
+    float focus_dist;
 };
 
 #endif

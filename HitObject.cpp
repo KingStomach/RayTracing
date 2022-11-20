@@ -20,14 +20,14 @@ bool Sphere::hit(const Ray& ray, float min, float max, HitRecord& record) const
 {
 	Vec3 oc = ray.origin() - o;
 	float a = ray.direction().Dot(ray.direction());
-	float b = 2.0 * ray.direction().Dot(oc);
+	float b = 2.0f * ray.direction().Dot(oc);
 	float c = oc.Dot(oc) - r * r;
-	float delta = b * b - 4.0 * a * c;
+	float delta = b * b - 4.0f * a * c;
 
 	if (delta < 0)
 		return false;
-	double t = std::sqrt(delta);
-	double t1 = (-b - t) * 0.5f / a;
+	float t = std::sqrt(delta);
+	float t1 = (-b - t) * 0.5f / a;
 	if (t1 < min)
 		t1 = (-b + t) * 0.5f / a;
 	if (t1 < min || t1 > max)

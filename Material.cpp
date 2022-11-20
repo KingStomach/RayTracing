@@ -20,13 +20,13 @@ bool Dielectric::scatter(const Ray& in, const HitRecord& record, Color& attenuat
 	Vec3 normal = record.isfront ? record.normal : -record.normal;
 	float cos_theta = -normal.Dot(in.direction());
 	float sin_theta = std::sqrt(1.0f - cos_theta * cos_theta);
-	float refraction_index = record.isfront ? (1.0f / ir) : ir;
+	float refraction_ratio = record.isfront ? (1.0f / ir) : ir;
 	Vec3 out_direction;
-	if (refraction_index * sin_theta > 1.0f || reflectance(cos_theta, refraction_index)> random_float())
+	if (refraction_ratio * sin_theta > 1.0f || reflectance(cos_theta, refraction_ratio) > random_float())
 	//if (refraction_index * sin_theta > 1.0f)
 		out_direction = Vec3::reflect(in.direction(), normal);
 	else
-		out_direction = Vec3::refract(in.direction(), normal, refraction_index);
+		out_direction = Vec3::refract(in.direction(), normal, refraction_ratio);
 
 	out = Ray(record.position, out_direction);
 	attenuation = Color(1.0f, 1.0f, 1.0f);
