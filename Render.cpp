@@ -77,10 +77,10 @@ Camera::Camera(const Point& position, const Vec3& lookat, const Vec3& up, float 
 
 Ray Camera::sample(float s, float v)
 {
+    
     Vec3 front = lookat - p;
     front.normalize();
     Vec3 x = up.cross(front), y = up;
-    //Vec3 offset = (s - 0.5) * xoffset * (up.cross(dir)) + (v - 0.5) * yoffset * up;
     Vec3 lookat_sv = p + front + (s - 0.5f) * xoffset * x + (v - 0.5f) * yoffset * y;
     Vec3 dir = (lookat_sv - p).normalize();
     return Ray(p, dir);

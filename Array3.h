@@ -9,12 +9,14 @@
 
 inline float random_float(float min = 0.0f, float max = 1.0f)
 {
-	static std::uniform_real_distribution<float> distribution(min, max);
+	static std::uniform_real_distribution<float> distribution(0.0f, 1.0f);
 	static std::mt19937 generator;
 	static std::function<float()> rand_generator =
 		std::bind(distribution, generator);
-	return rand_generator();
+	return (rand_generator() + min) * (max - min);
 }
+
+inline int random_int(int min, int max) { return static_cast<int>(random_float() * (max - min) + min); }
 
 class Array3
 {
@@ -34,12 +36,17 @@ protected:
 	inline Array3 operator^=(float x) { data[0] = std::pow(data[0], x), data[1] = std::pow(data[1], x), data[2] = std::pow(data[2], x); return *this; }
 
 	float data[3];
+
+public:
+	inline float operator[](int i) const { return data[i]; }
+	inline float& operator[](int i) { return data[i]; }
 };
 
 class Vec3 : public Array3
 {
 public:
-	explicit Vec3(float x = 0.0, float y = 0.0, float z = 0.0) : Array3(x, y, z) {}
+	Vec3() : Array3(0.0f, 0.0f ,0.0f) {}
+	explicit Vec3(float x, float y, float z) : Array3(x, y, z) {}
 	Vec3(const Array3& arr) : Array3(arr) {}
 
 	inline float x() { return data[0]; }
@@ -89,12 +96,13 @@ public:
 class Point : public Array3
 {
 public:
-	explicit Point(float x = 0.0f, float y = 0.0f, float z = 0.0f) : Array3(x, y, z) {}
+	Point() : Array3(0.0f, 0.0f ,0.0f) {}
+	explicit Point(float x, float y, float z) : Array3(x, y, z) {}
 	Point(const Array3& arr) : Array3(arr) {}
 
-	inline float x() { return data[0]; }
-	inline float y() { return data[1]; }
-	inline float z() { return data[2]; }
+	inline float x() const { return data[0]; }
+	inline float y() const { return data[1]; }
+	inline float z() const { return data[2]; }
 
 	inline Point operator+(const Vec3& v) const { return Array3::operator+(v); }
 	inline Vec3 operator-(const Point& v) const { return Array3::operator-(v); }
@@ -103,7 +111,8 @@ public:
 class Color : public Array3
 {
 public:
-	explicit Color(float x = 0.0f, float y = 0.0f, float z = 0.0f) : Array3(x, y, z) {}
+	Color() : Array3(0.0f, 0.0f, 0.0f) {}
+	explicit Color(float x, float y, float z) : Array3(x, y, z) {}
 	Color(const Array3& arr) : Array3(arr) {}
 
 	inline float r() const { return data[0]; }

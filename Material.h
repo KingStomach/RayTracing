@@ -6,7 +6,7 @@
 class Material
 {
 public:
-	virtual bool scatter(const Ray& in, const HitRecord& record, Color& attenuation, Ray& out) const = 0;
+	virtual bool scatter(const Vec3& in, const Vec3& normal, Color& attenuation, Vec3& out) const = 0;
 };
 
 class Diffuse : public Material
@@ -14,7 +14,7 @@ class Diffuse : public Material
 public:
 	Diffuse(const Color& albedo) : albedo(albedo) {}
 
-	bool scatter(const Ray& in, const HitRecord& record, Color& attenuation, Ray& out) const override;
+	bool scatter(const Vec3& in, const Vec3& normal, Color& attenuation, Vec3& out) const override;
 private:
 	Color albedo;
 };
@@ -24,7 +24,7 @@ class Metal : public Material
 public:
 	Metal(const Color& albedo, float fuzz) : albedo(albedo), fuzz(fuzz) {}
 
-	bool scatter(const Ray& in, const HitRecord& record, Color& attenuation, Ray& out) const override;
+	bool scatter(const Vec3& in, const Vec3& normal, Color& attenuation, Vec3& out) const override;
 private:
 	Color albedo;
 	float fuzz;
@@ -35,7 +35,7 @@ class Dielectric : public Material
 public:
 	Dielectric(float ir) : ir(ir) {}
 
-	bool scatter(const Ray& in, const HitRecord& record, Color& attenuation, Ray& out) const override;
+	bool scatter(const Vec3& in, const Vec3& normal, Color& attenuation, Vec3& out) const override;
 private:
 	float ir;
 

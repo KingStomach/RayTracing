@@ -9,7 +9,7 @@
 
 const int width = 1024;
 const int height = 768;
-const float fov = 45.0f;
+const float fov = 90.0f;
 const float aspect_ratio = (float)width / height;
 
 
@@ -70,10 +70,10 @@ Color RayTrace(const Ray& in,const Scene& scene, int depth)
 	HitRecord record;
 	if (scene.hit(in, 0.001f, std::numeric_limits<float>::infinity(), record))
 	{
-		Ray out(in);
+		Vec3 out_dir;
 		Color attenuation;
-		if (record.object->material()->scatter(in, record, attenuation, out))
-			return attenuation * RayTrace(out, scene, depth - 1);
+		if (record.object->material()->scatter(in.direction(), record.normal, attenuation, out_dir))
+			return attenuation * RayTrace(Ray(record.position, out_dir), scene, depth - 1);
 		else
 			return Black;
 	}
@@ -88,9 +88,9 @@ Color RayTrace(const Ray& in,const Scene& scene, int depth)
 int main(void)
 {
 	Bitmap framebuff(width, height);
-	Camera camera(Point(0.0f, 0.0f, 1.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(0.0f, 1.0f, 0.0f), 90.0f, aspect_ratio);
-	//Camera camera(Point(13.0f, 2.0f, 3.0f), Vec3(0.0f, 0.0f, 0.0f), Vec3(0, 1.0f, 0), 60.0, aspect_ratio);
-	
+	//Camera camera(Point(0.0f, 0.0f, 1.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(0.0f, 1.0f, 0.0f), fov, aspect_ratio);
+	Camera camera(Point(13.0f, 2.0f, 3.0f), Vec3(0.0f, 0.0f, 0.0f), Vec3(0, 1.0f, 0), 60.0, aspect_ratio);
+	/*
 	auto material_ground = std::make_shared<Diffuse>(Color(0.8f, 0.8f, 0.0f));
 	auto material_center = std::make_shared<Diffuse>(Color(0.1f, 0.2f, 0.5f));
 	auto material_left = std::make_shared<Dielectric>(1.5f);
@@ -100,14 +100,18 @@ int main(void)
 	scene.addObject(std::make_shared<Sphere>(Point(0.0f, -100.5f, -1.0f), 100.0f, material_ground));
 	scene.addObject(std::make_shared<Sphere>(Point(0.0f, 0.0f, -1.0f), 0.5f, material_center));
 	scene.addObject(std::make_shared<Sphere>(Point(1.0f, 0.0f, -1.0f), 0.5f, material_left));
-	scene.addObject(std::make_shared<Sphere>(Point(-1.0f, 0.0f, -1.0f), 0.5f, material_right));
-
-	//Scene scene = random_scene();
+	scene.addObject(std::make_shared<Sphere>(Point(-1.0f, 0.0f, -1.0f), 0.5f, material_right));*/
+	
+	Scene scene = random_scene();
+	scene.buildBVHTree();
 
 	clock_t start_time = clock();
 	
-	std::mutex mutex;
-	concurrency::parallel_for(0, width, [&framebuff, &scene, &camera, &mutex](int i)
+	std::mutex buffer_mutex;
+	std::mutex progress_mutex;
+	int finish_line = 0;
+	
+	concurrency::parallel_for(0, width, [&framebuff, &scene, &camera, &buffer_mutex, &progress_mutex, &finish_line](int i)
 		{
 			for (int j = 0; j < height; ++j)
 			{
@@ -123,13 +127,18 @@ int main(void)
 				color /= 10.0f;
 				color ^= (1.0f / 2.2f);
 				{
-					std::lock_guard<std::mutex> lock(mutex);
+					std::lock_guard<std::mutex> lock(buffer_mutex);
 					framebuff.SetPixel(i, j, color);
 				}
 			}
-		});
 
-	//std::cout << clock() - start_time;
+			{
+				std::lock_guard<std::mutex> lock(progress_mutex);
+				finish_line++;
+				std::cout << "Drawing:" + std::to_string((float)finish_line / width * 100.0f) + "%" << std::endl;
+			}
+		});
+	std::cout << clock() - start_time;
 	framebuff.SaveFile("out.bmp");
 	return 0;
 }
