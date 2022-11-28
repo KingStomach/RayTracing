@@ -34,26 +34,26 @@ BVHNode::BVHNode(const std::vector<std::shared_ptr<RenderObject>>& objects)
 	*this = buildBVHTree(array, 0, array.size() - 1);
 }
 
-bool BVHNode::hit(const Ray& ray, float min, float max, HitRecord& record) const
+bool BVHNode::hit(const Ray& ray, float min, float max, IntersectInfo& info, std::shared_ptr<RenderObject>& object) const
 {
 	if (!_box.hit(ray, min, max))
 		return false;
 
 	if (isLeaf())
 	{
-		if (_object->hit(ray, min, max, record))
+		if (_object->hit(ray, min, max, info))
 		{
-			record.object = _object;
+			object = _object;
 			return true;
 		}
 		else
 			return false;
 	}
 
-	bool leftHit = left->hit(ray, min, max, record);
+	bool leftHit = left->hit(ray, min, max, info, object);
 	if (leftHit)
-		max = (record.position - ray.origin()).length();
-	bool rightHit = right->hit(ray, min, max, record);
+		max = (info.position - ray.origin()).length();
+	bool rightHit = right->hit(ray, min, max, info, object);
 	return leftHit || rightHit;
 }
 
@@ -93,7 +93,7 @@ BVHNode BVHNode::buildBVHTree(std::vector<RenderObjectInfo>& objects, int left, 
 	return tree;
 }
 
-bool Sphere::hit(const Ray& ray, float min, float max, HitRecord& record) const
+bool Sphere::hit(const Ray& ray, float min, float max, IntersectInfo& info) const
 {
 	Vec3 oc = ray.origin() - center();
 	float a = ray.direction().Dot(ray.direction());
@@ -110,8 +110,8 @@ bool Sphere::hit(const Ray& ray, float min, float max, HitRecord& record) const
 	if (t1 < min || t1 > max)
 		return false;
 
-	record.position = ray.at(t1);
-	record.normal = (record.position - center()).normalize();
+	info.position = ray.at(t1);
+	info.normal = (info.position - center()).normalize();
 	return true;
 }
 
@@ -121,19 +121,19 @@ AABB Sphere::createBox() const
 	return AABB(_center - dir, _center + dir);
 }
 
-bool Scene::hit(const Ray& ray, float min, float max, HitRecord& record) const
+bool Scene::hit(const Ray& ray, float min, float max, IntersectInfo& info, std::shared_ptr<RenderObject>& object) const
 {
-	return _tree.hit(ray, min, max, record);
+	return _tree.hit(ray, min, max, info, object);
 	/*
 	float closest = max;
 	bool ishit = false;
 	for (auto&& o : _objects)
 	{
-		if (o->hit(ray, min, closest, record))
+		if (o->hit(ray, min, closest, info))
 		{
 			ishit = true;
-			closest = (record.position - ray.origin()).length();
-			record.object = o;
+			closest = (info.position - ray.origin()).length();
+			object = o;
 		}
 	}
 	return ishit;*/

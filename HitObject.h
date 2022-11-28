@@ -6,11 +6,10 @@
 class Material;
 class RenderObject;
 
-struct HitRecord
+struct IntersectInfo
 {
 	Point position;
 	Vec3 normal;
-	std::shared_ptr<RenderObject> object;
 };
 
 class Ray
@@ -57,7 +56,7 @@ class RenderObject
 public:
 	std::shared_ptr<Material> material() const { return _material; }
 
-	virtual bool hit(const Ray& ray, float min, float max, HitRecord& record) const = 0;
+	virtual bool hit(const Ray& ray, float min, float max, IntersectInfo& info) const = 0;
 	virtual AABB createBox() const = 0;
 
 protected:
@@ -73,7 +72,7 @@ public:
 	explicit Sphere(const Point& center, float radius, const std::shared_ptr<Material>& material)
 		: _center(center), _radius(radius), RenderObject(material) {}
 
-	bool hit(const Ray& ray, float min, float max, HitRecord& record) const override;
+	bool hit(const Ray& ray, float min, float max, IntersectInfo& info) const override;
 	AABB createBox() const override;
 
 	Point center() { return _center; }
@@ -96,7 +95,7 @@ public:
 	explicit BVHNode(const std::shared_ptr<RenderObject>& object, const AABB& box) : _object(object), _box(box) {}
 	explicit BVHNode(const std::vector<std::shared_ptr<RenderObject>>& objects);
 
-	bool hit(const Ray& ray, float min, float max, HitRecord& record) const;
+	bool hit(const Ray& ray, float min, float max, IntersectInfo& info, std::shared_ptr<RenderObject>& object) const;
 	bool isLeaf() const { return !left && !right; }
 
 	std::shared_ptr<BVHNode> left;
@@ -119,7 +118,7 @@ public:
 	inline void addObject(const std::shared_ptr<RenderObject>& object) { _objects.emplace_back(object); }
 	inline void clear() { _objects.clear(); }
 
-	bool hit(const Ray& ray, float min, float max, HitRecord& record) const;
+	bool hit(const Ray& ray, float min, float max, IntersectInfo& info, std::shared_ptr<RenderObject>& object) const;
 	void buildBVHTree() { _tree = BVHTree(_objects); }
 
 private:

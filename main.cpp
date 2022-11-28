@@ -67,13 +67,14 @@ Color RayTrace(const Ray& in,const Scene& scene, int depth)
 	if (depth <= 0)
 		return Black;
 
-	HitRecord record;
-	if (scene.hit(in, 0.001f, std::numeric_limits<float>::infinity(), record))
+	IntersectInfo info;
+	std::shared_ptr<RenderObject> object;
+	if (scene.hit(in, 0.001f, std::numeric_limits<float>::infinity(), info, object))
 	{
 		Vec3 out_dir;
 		Color attenuation;
-		if (record.object->material()->scatter(in.direction(), record.normal, attenuation, out_dir))
-			return attenuation * RayTrace(Ray(record.position, out_dir), scene, depth - 1);
+		if (object->material()->scatter(in.direction(), info.normal, attenuation, out_dir))
+			return attenuation * RayTrace(Ray(info.position, out_dir), scene, depth - 1);
 		else
 			return Black;
 	}
