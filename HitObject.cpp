@@ -121,6 +121,28 @@ AABB Sphere::createBox() const
 	return AABB(_center - dir, _center + dir);
 }
 
+bool MovingSphere::hit(const Ray& ray, float min, float max, IntersectInfo& info) const
+{
+	Vec3 oc = ray.origin() - center(ray.time());
+	float a = ray.direction().Dot(ray.direction());
+	float b = 2.0f * ray.direction().Dot(oc);
+	float c = oc.Dot(oc) - radius() * radius();
+	float delta = b * b - 4.0f * a * c;
+
+	if (delta < 0)
+		return false;
+	float t = std::sqrt(delta);
+	float t1 = (-b - t) * 0.5f / a;
+	if (t1 < min)
+		t1 = (-b + t) * 0.5f / a;
+	if (t1 < min || t1 > max)
+		return false;
+
+	info.position = ray.at(t1);
+	info.normal = (info.position - center(ray.time())).normalize();
+	return true;
+}
+
 bool Scene::hit(const Ray& ray, float min, float max, IntersectInfo& info, std::shared_ptr<RenderObject>& object) const
 {
 	return _tree.hit(ray, min, max, info, object);

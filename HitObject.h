@@ -15,16 +15,17 @@ struct IntersectInfo
 class Ray
 {
 public:
-	Ray() {}
-	Ray(const Point& point, const Vec3& dir) : _origin(point), _dir(dir) {}
+	explicit Ray(const Point& point, const Vec3& dir, float time = 0.0f) : _origin(point), _dir(dir), _time(time) {}
 
 	Point origin() const { return _origin; }
 	Vec3 direction() const { return _dir; }
+	float time() const { return _time; }
 	Point at(float t) const { return _origin + _dir * t; }
 
 private:
 	Point _origin;
 	Vec3 _dir;
+	float _time;
 };
 
 class BoundingBox
@@ -82,6 +83,20 @@ public:
 protected:
 	Point _center;
 	float _radius;
+};
+
+class MovingSphere : public Sphere
+{
+public:
+	explicit MovingSphere(const Point& center, float radius, const std::shared_ptr<Material>& material, const Vec3& velocity, float time = 0.0f)
+		: Sphere(center, radius, material), _velocity(velocity) {}
+
+	bool hit(const Ray& ray, float min, float max, IntersectInfo& info) const override;
+
+	Point center(float time) const { return _center + _velocity * time; }
+
+private:
+	Vec3 _velocity;
 };
 
 typedef std::pair<std::shared_ptr<RenderObject>, AABB> RenderObjectInfo;

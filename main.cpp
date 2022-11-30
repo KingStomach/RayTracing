@@ -7,8 +7,8 @@
 #include "Material.h"
 #include "Render.h"
 
-const int width = 1024;
-const int height = 768;
+const int width = 512;
+const int height = 384;
 const float fov = 90.0f;
 const float aspect_ratio = (float)width / height;
 
@@ -32,7 +32,8 @@ Scene random_scene()
 					// diffuse
 					auto albedo = Color::random() * Color::random();
 					sphere_material = std::make_shared<Diffuse>(albedo);
-					scene.addObject(std::make_shared<Sphere>(center, 0.2f, sphere_material));
+					//scene.addObject(std::make_shared<Sphere>(center, 0.2f, sphere_material));
+					scene.addObject(std::make_shared<MovingSphere>(center, 0.2f, sphere_material, Vec3(0.0f, random_float(0.0f, 0.5f), 0.0f)));
 				}
 				else if (choose_mat < 0.95f) {
 					// metal
@@ -74,7 +75,7 @@ Color RayTrace(const Ray& in,const Scene& scene, int depth)
 		Vec3 out_dir;
 		Color attenuation;
 		if (object->material()->scatter(in.direction(), info.normal, attenuation, out_dir))
-			return attenuation * RayTrace(Ray(info.position, out_dir), scene, depth - 1);
+			return attenuation * RayTrace(Ray(info.position, out_dir, in.time()), scene, depth - 1);
 		else
 			return Black;
 	}
@@ -118,14 +119,14 @@ int main(void)
 			{
 				float xoffset, yoffset;
 				Color color;
-				for (int k = 0; k < 10; k++)
+				for (int k = 0; k < 100; k++)
 				{
 					xoffset = random_float(), yoffset = random_float();
 					Ray ray = camera.sample(((float)i + xoffset) / width, ((float)j + yoffset) / height);
 					color += RayTrace(ray, scene, 50);
 				}
 
-				color /= 10.0f;
+				color /= 100.0f;
 				color ^= (1.0f / 2.2f);
 				{
 					std::lock_guard<std::mutex> lock(buffer_mutex);
