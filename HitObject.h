@@ -10,6 +10,8 @@ struct IntersectInfo
 {
 	Point position;
 	Vec3 normal;
+	float u;
+	float v;
 };
 
 class Ray
@@ -81,6 +83,8 @@ public:
 	float radius() const { return _radius; }
 
 protected:
+	std::pair<float, float> getUV(const Vec3& normal) const;
+
 	Point _center;
 	float _radius;
 };

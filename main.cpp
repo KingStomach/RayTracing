@@ -7,17 +7,16 @@
 #include "Material.h"
 #include "Render.h"
 
+
 const int width = 512;
 const int height = 384;
-const float fov = 90.0f;
-const float aspect_ratio = (float)width / height;
-
 
 Scene random_scene()
 {
 	Scene scene;
 
-	auto ground_material = std::make_shared<Diffuse>(Color(0.5f, 0.5f, 0.5f));
+	auto checker = std::make_shared<CheckerTexture>(Color(0.2f, 0.3f, 0.1f), Color(0.9f, 0.9f, 0.9f), 10000.0f);
+	auto ground_material = std::make_shared<Diffuse>(checker);
 	scene.addObject(std::make_shared<Sphere>(Point(0.0f, -1000.0f, 0.0f), 1000.0f, ground_material));
 
 	for (int a = -11; a < 11; a++) {
@@ -63,6 +62,19 @@ Scene random_scene()
 	return scene;
 }
 
+Scene two_sphere()
+{
+	Scene scene;
+
+	auto checker = std::make_shared<CheckerTexture>(Color(0.2f, 0.3f, 0.1f), Color(0.9f, 0.9f, 0.9f), 500.0f);
+	auto material = std::make_shared<Diffuse>(checker);
+
+	scene.addObject(std::make_shared<Sphere>(Point(0.0f, -10.0f, 0.0f), 10.0f, material));
+	scene.addObject(std::make_shared<Sphere>(Point(0.0f, 10.0f, 0.0f), 10.0f, material));
+
+	return scene;
+}
+
 Color RayTrace(const Ray& in,const Scene& scene, int depth)
 {
 	if (depth <= 0)
@@ -73,9 +85,11 @@ Color RayTrace(const Ray& in,const Scene& scene, int depth)
 	if (scene.hit(in, 0.001f, std::numeric_limits<float>::infinity(), info, object))
 	{
 		Vec3 out_dir;
-		Color attenuation;
-		if (object->material()->scatter(in.direction(), info.normal, attenuation, out_dir))
+		if (object->material()->scatter(in.direction(), info.normal, out_dir))
+		{
+			Color attenuation = object->material()->attenuation(info.u, info.v);
 			return attenuation * RayTrace(Ray(info.position, out_dir, in.time()), scene, depth - 1);
+		}
 		else
 			return Black;
 	}
@@ -89,22 +103,57 @@ Color RayTrace(const Ray& in,const Scene& scene, int depth)
 
 int main(void)
 {
+	float fov = 90.0f;
+	float aspect_ratio = (float)width / height;
 	Bitmap framebuff(width, height);
-	//Camera camera(Point(0.0f, 0.0f, 1.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(0.0f, 1.0f, 0.0f), fov, aspect_ratio);
-	Camera camera(Point(13.0f, 2.0f, 3.0f), Vec3(0.0f, 0.0f, 0.0f), Vec3(0, 1.0f, 0), 60.0, aspect_ratio);
-	/*
-	auto material_ground = std::make_shared<Diffuse>(Color(0.8f, 0.8f, 0.0f));
-	auto material_center = std::make_shared<Diffuse>(Color(0.1f, 0.2f, 0.5f));
-	auto material_left = std::make_shared<Dielectric>(1.5f);
-	auto material_right = std::make_shared<Metal>(Color(0.8f, 0.6f, 0.2f), 0.0f);
+	Point position;
+	Vec3 lookat, up(0.0f, 1.0f, 0.0f);
 
 	Scene scene;
-	scene.addObject(std::make_shared<Sphere>(Point(0.0f, -100.5f, -1.0f), 100.0f, material_ground));
-	scene.addObject(std::make_shared<Sphere>(Point(0.0f, 0.0f, -1.0f), 0.5f, material_center));
-	scene.addObject(std::make_shared<Sphere>(Point(1.0f, 0.0f, -1.0f), 0.5f, material_left));
-	scene.addObject(std::make_shared<Sphere>(Point(-1.0f, 0.0f, -1.0f), 0.5f, material_right));*/
-	
-	Scene scene = random_scene();
+
+	switch (2)
+	{
+	case 0:
+	{
+		position = Point(0.0f, 0.0f, 1.0f);
+		lookat = Vec3(0.0f, 0.0f, -1.0f);
+
+		auto material_ground = std::make_shared<Diffuse>(Color(0.8f, 0.8f, 0.0f));
+		auto material_center = std::make_shared<Diffuse>(Color(0.1f, 0.2f, 0.5f));
+		auto material_left = std::make_shared<Dielectric>(1.5f);
+		auto material_right = std::make_shared<Metal>(Color(0.8f, 0.6f, 0.2f), 0.0f);
+
+		scene.addObject(std::make_shared<Sphere>(Point(0.0f, -100.5f, -1.0f), 100.0f, material_ground));
+		scene.addObject(std::make_shared<Sphere>(Point(0.0f, 0.0f, -1.0f), 0.5f, material_center));
+		scene.addObject(std::make_shared<Sphere>(Point(1.0f, 0.0f, -1.0f), 0.5f, material_left));
+		scene.addObject(std::make_shared<Sphere>(Point(-1.0f, 0.0f, -1.0f), 0.5f, material_right));
+
+		break;
+	}
+	case 1:
+	{
+		position = Point(13.0f, 2.0f, 3.0f);
+		lookat = Vec3(0.0f, 0.0f, 0.0f);
+		fov = 60.0f;
+
+		scene = random_scene();
+
+		break;
+	}
+	case 2:
+	{
+		position = Point(13.0f, 2.0f, 3.0f);
+		lookat = Vec3(0.0f, 0.0f, 0.0f);
+		fov = 60.0f;
+
+		scene = two_sphere();
+
+	}
+	default:
+		break;
+	}
+
+	Camera camera(position, lookat, up, fov, aspect_ratio);
 	scene.buildBVHTree();
 
 	clock_t start_time = clock();

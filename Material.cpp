@@ -1,21 +1,25 @@
 #include "Material.h"
 
-bool Diffuse::scatter(const Vec3& in, const Vec3& normal, Color& attenuation, Vec3& out) const
+Color CheckerTexture::sample(float u, float v) const
+{
+	float sines = std::sin(u * _scale) * std::sin(v * _scale);
+	return sines > 0.0f ? _even->sample(u, v) : _odd->sample(u, v);
+}
+
+bool Diffuse::scatter(const Vec3& in, const Vec3& normal, Vec3& out) const
 {
 	out = Vec3::random_hemisphere(normal);
-	attenuation = albedo;
 	return true;
 }
 
-bool Metal::scatter(const Vec3& in, const Vec3& normal, Color& attenuation, Vec3& out) const
+bool Metal::scatter(const Vec3& in, const Vec3& normal, Vec3& out) const
 {
 	Vec3 reflect = Vec3::reflect(in, normal);
-	out = reflect + fuzz * Vec3::random_sphere().normalize();
-	attenuation = albedo;
+	out = reflect + _fuzz * Vec3::random_sphere().normalize();
 	return out.Dot(normal) > 0;
 }
 
-bool Dielectric::scatter(const Vec3& in, const Vec3& normal, Color& attenuation, Vec3& out) const
+bool Dielectric::scatter(const Vec3& in, const Vec3& normal, Vec3& out) const
 {
 	bool isfront = in.Dot(normal) < 0.0f;
 	Vec3 scatterNormal = isfront ? normal : -normal;
@@ -26,6 +30,5 @@ bool Dielectric::scatter(const Vec3& in, const Vec3& normal, Color& attenuation,
 		out = Vec3::reflect(in, scatterNormal);
 	else
 		out = Vec3::refract(in, scatterNormal, refraction_ratio);
-	attenuation = Color(1.0f, 1.0f, 1.0f);
 	return true;
 }

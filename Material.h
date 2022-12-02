@@ -3,39 +3,75 @@
 
 #include "HitObject.h"
 
+class Texutre
+{
+public:
+	virtual Color sample(float u, float v) const = 0;
+};
+
+class SoildTexutre : public Texutre
+{
+public:
+	explicit SoildTexutre(const Color& color) : _color(color) {}
+
+	Color sample(float u, float v) const override { return _color; }
+
+private:
+	Color _color;
+};
+
+class CheckerTexture : public Texutre
+{
+public:
+	explicit CheckerTexture(const std::shared_ptr<Texutre>& even, const std::shared_ptr<Texutre>& odd, float scale = 1.0f) : _even(even), _odd(odd), _scale(scale) {}
+	explicit CheckerTexture(const Color& c1, const Color& c2, float scale = 1.0f) : _even(std::make_shared<SoildTexutre>(c1)), _odd(std::make_shared<SoildTexutre>(c2)), _scale(scale) {}
+
+	Color sample(float u, float v) const override;
+
+private:
+	std::shared_ptr<Texutre> _even;
+	std::shared_ptr<Texutre> _odd;
+	float _scale;
+};
+
 class Material
 {
 public:
-	virtual bool scatter(const Vec3& in, const Vec3& normal, Color& attenuation, Vec3& out) const = 0;
+	virtual bool scatter(const Vec3& in, const Vec3& normal, Vec3& out) const = 0;
+	virtual Color attenuation(float u, float v) const = 0;
 };
 
 class Diffuse : public Material
 {
 public:
-	Diffuse(const Color& albedo) : albedo(albedo) {}
+	explicit Diffuse(const Color& albedo) : _albedo(std::make_shared<SoildTexutre>(albedo)) {}
+	explicit Diffuse(const std::shared_ptr<Texutre>& texture) : _albedo(texture) {}
 
-	bool scatter(const Vec3& in, const Vec3& normal, Color& attenuation, Vec3& out) const override;
+	bool scatter(const Vec3& in, const Vec3& normal, Vec3& out) const override;
+	Color attenuation(float u, float v) const override { return _albedo->sample(u, v); }
 private:
-	Color albedo;
+	std::shared_ptr<Texutre> _albedo;
 };
 
 class Metal : public Material
 {
 public:
-	Metal(const Color& albedo, float fuzz) : albedo(albedo), fuzz(fuzz) {}
+	explicit Metal(const Color& albedo, float fuzz) : _albedo(albedo), _fuzz(fuzz) {}
 
-	bool scatter(const Vec3& in, const Vec3& normal, Color& attenuation, Vec3& out) const override;
+	bool scatter(const Vec3& in, const Vec3& normal, Vec3& out) const override;
+	Color attenuation(float u, float v) const override { return _albedo; }
 private:
-	Color albedo;
-	float fuzz;
+	Color _albedo;
+	float _fuzz;
 };
 
 class Dielectric : public Material
 {
 public:
-	Dielectric(float ir) : ir(ir) {}
+	explicit Dielectric(float ir) : ir(ir) {}
 
-	bool scatter(const Vec3& in, const Vec3& normal, Color& attenuation, Vec3& out) const override;
+	bool scatter(const Vec3& in, const Vec3& normal, Vec3& out) const override;
+	Color attenuation(float u, float v) const override { return Color(1.0f, 1.0f, 1.0f); }
 private:
 	float ir;
 

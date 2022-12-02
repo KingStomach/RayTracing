@@ -112,6 +112,9 @@ bool Sphere::hit(const Ray& ray, float min, float max, IntersectInfo& info) cons
 
 	info.position = ray.at(t1);
 	info.normal = (info.position - center()).normalize();
+	auto uv = getUV(info.normal);
+	info.u = uv.first;
+	info.v = uv.second;
 	return true;
 }
 
@@ -119,6 +122,14 @@ AABB Sphere::createBox() const
 {
 	Vec3 dir(_radius, _radius, _radius);
 	return AABB(_center - dir, _center + dir);
+}
+
+std::pair<float, float> Sphere::getUV(const Vec3& normal) const
+{
+	std::pair<float, float> uv;
+	float phi = std::asin(normal[2]);
+	float theta = std::acos(normal[0] / std::cos(phi));
+	return std::make_pair<float, float>(theta / 2.0 / PI, phi / PI);
 }
 
 bool MovingSphere::hit(const Ray& ray, float min, float max, IntersectInfo& info) const
@@ -140,6 +151,9 @@ bool MovingSphere::hit(const Ray& ray, float min, float max, IntersectInfo& info
 
 	info.position = ray.at(t1);
 	info.normal = (info.position - center(ray.time())).normalize();
+	auto uv = getUV(info.normal);
+	info.u = uv.first;
+	info.v = uv.second;
 	return true;
 }
 
