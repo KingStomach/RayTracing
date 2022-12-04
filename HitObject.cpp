@@ -157,6 +157,75 @@ bool MovingSphere::hit(const Ray& ray, float min, float max, IntersectInfo& info
 	return true;
 }
 
+bool RectangleXY::hit(const Ray& ray, float min, float max, IntersectInfo& info) const
+{
+	float t = (z - ray.origin().z()) / ray.direction().z();
+	if (t < min || t > max)
+		return false;
+
+	float x = ray.origin().x() + t * ray.direction().x();
+	float y = ray.origin().y() + t * ray.direction().y();
+	if (x < x0 || x > x1 || y < y0 || y > y1)
+		return false;
+
+	info.position = Point(x, y, z);
+	info.normal = ray.origin().z() > z ? Vec3(0.0f, 0.0f, 1.0f) : Vec3(0.0f, 0.0f, -1.0f);
+	info.u = (x - x0) / (x1 - x0);
+	info.v = (y - y0) / (y1 - y0);
+	return true;
+}
+
+AABB RectangleXY::createBox() const
+{
+	return AABB(Point(x0, y0, z - 0.001f), Point(x1, y1, z + 0.001f));
+}
+
+bool RectangleYZ::hit(const Ray& ray, float min, float max, IntersectInfo& info) const
+{
+	float t = (x - ray.origin().x()) / ray.direction().x();
+	if (t < min || t > max)
+		return false;
+
+	float y = ray.origin().y() + t * ray.direction().y();
+	float z = ray.origin().z() + t * ray.direction().z();
+	if (y < y0 || y > y1 || z < z0 || z > z1)
+		return false;
+
+	info.position = Point(x, y, z);
+	info.normal = ray.origin().x() > x ? Vec3(1.0f, 0.0f, 0.0f) : Vec3(-1.0f, 0.0f, 0.0f);
+	info.u = (y - y0) / (y1 - y0);
+	info.v = (z - z0) / (z1 - z0);
+	return true;
+}
+
+AABB RectangleYZ::createBox() const
+{
+	return AABB(Point(x - 0.001f, y0, z0), Point(x + 0.001f, y1, z1));
+}
+
+bool RectangleXZ::hit(const Ray& ray, float min, float max, IntersectInfo& info) const
+{
+	float t = (y - ray.origin().y()) / ray.direction().y();
+	if (t < min || t > max)
+		return false;
+
+	float x = ray.origin().x() + t * ray.direction().x();
+	float z = ray.origin().z() + t * ray.direction().z();
+	if (x < x0 || x > x1 || z < z0 || z > z1)
+		return false;
+
+	info.position = Point(x, y, z);
+	info.normal = ray.origin().y() > y ? Vec3(0.0f, 1.0f, 0.0f) : Vec3(0.0f, -1.0f, 0.0f);
+	info.u = (x - x0) / (x1 - x0);
+	info.v = (z - z0) / (z1 - z0);
+	return true;
+}
+
+AABB RectangleXZ::createBox() const
+{
+	return AABB(Point(x0, y - 0.001f, z0), Point(x1, y + 0.001f, z1));
+}
+
 bool Scene::hit(const Ray& ray, float min, float max, IntersectInfo& info, std::shared_ptr<RenderObject>& object) const
 {
 	return _tree.hit(ray, min, max, info, object);

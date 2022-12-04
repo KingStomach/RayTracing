@@ -103,6 +103,51 @@ private:
 	Vec3 _velocity;
 };
 
+class RectangleXY : public RenderObject
+{
+public:
+	explicit RectangleXY(float x0, float x1, float y0, float y1, float z, const std::shared_ptr<Material>& material)
+		: x0(x0), x1(x1), y0(y0), y1(y1), z(z), RenderObject(material) {}
+
+	bool hit(const Ray& ray, float min, float max, IntersectInfo& info) const override;
+	AABB createBox() const override;
+
+private:
+	float x0, x1, y0, y1, z;
+};
+
+class RectangleYZ : public RenderObject
+{
+public:
+	explicit RectangleYZ(float y0, float y1, float z0, float z1, float x, const std::shared_ptr<Material>& material)
+		: y0(y0), y1(y1), z0(z0), z1(z1), x(x), RenderObject(material) {}
+
+	bool hit(const Ray& ray, float min, float max, IntersectInfo& info) const override;
+	AABB createBox() const override;
+
+private:
+	float y0, y1, z0, z1, x;
+};
+
+class RectangleXZ : public RenderObject
+{
+public:
+	explicit RectangleXZ(float x0, float x1, float z0, float z1, float y, const std::shared_ptr<Material>& material)
+		: x0(x0), x1(x1), z0(z0), z1(z1), y(y), RenderObject(material) {}
+
+	bool hit(const Ray& ray, float min, float max, IntersectInfo& info) const override;
+	AABB createBox() const override;
+
+private:
+	float x0, x1, z0, z1, y;
+};
+
+class Cuboid : public RenderObject
+{
+private:
+
+};
+
 typedef std::pair<std::shared_ptr<RenderObject>, AABB> RenderObjectInfo;
 
 class BVHNode

@@ -75,6 +75,39 @@ Scene two_sphere()
 	return scene;
 }
 
+Scene simple_light()
+{
+	Scene scene;
+	auto material = std::make_shared<Diffuse>(Color(0.2f, 0.3f, 0.1f));
+
+	scene.addObject(std::make_shared<Sphere>(Point(0.0f, -1000.0f, 0.0f), 1000.0f, material));
+	scene.addObject(std::make_shared<Sphere>(Point(0.0f, 2.0f, 0.0f), 2.0f, material));
+
+	auto difflight = std::make_shared<Emissive>(Color(4.0f, 4.0f, 4.0f));
+	scene.addObject(std::make_shared<RectangleXY>(3.0f, 5.0f, 1.0f, 3.0f, -2.0f, difflight));
+
+	return scene;
+}
+
+Scene cornell_box()
+{
+	Scene scene;
+
+	auto red = std::make_shared<Diffuse>(Color(0.65f, 0.05f, 0.05f));
+	auto white = std::make_shared<Diffuse>(Color(0.73f, 0.73f, 0.73f));
+	auto green = std::make_shared<Diffuse>(Color(0.12f, 0.45f, 0.15f));
+	auto light = std::make_shared<Emissive>(Color(15.0f, 15.0f, 15.0f));
+
+	scene.addObject(std::make_shared<RectangleYZ>(0.0f, 555.0f, 0.0f, 555.0f, 555.0f, green));
+	scene.addObject(std::make_shared<RectangleYZ>(0.0f, 555.0f, 0.0f, 555.0f, 0.0f, red));
+	scene.addObject(std::make_shared<RectangleXZ>(213.0f, 343.0f, 227.0f, 332.0f, 554.0f, light));
+	scene.addObject(std::make_shared<RectangleXZ>(0.0f, 555.0f, 0.0f, 555.0f, 0.0f, white));
+	scene.addObject(std::make_shared<RectangleXZ>(0.0f, 555.0f, 0.0f, 555.0f, 555.0f, white));
+	scene.addObject(std::make_shared<RectangleXY>(0.0f, 555.0f, 0.0f, 555.0f, 555.0f, white));
+
+	return scene;
+}
+
 Color RayTrace(const Ray& in,const Scene& scene, int depth)
 {
 	if (depth <= 0)
@@ -91,12 +124,13 @@ Color RayTrace(const Ray& in,const Scene& scene, int depth)
 			return attenuation * RayTrace(Ray(info.position, out_dir, in.time()), scene, depth - 1);
 		}
 		else
-			return Black;
+			return object->material()->emit(info.u, info.v);
 	}
 	else
 	{
-		float t = 0.5f * (in.direction().y() + 1.0f);
-		return (1.0f - t) * Color(1.0f, 1.0f, 1.0f) + t * Color(0.5f, 0.7f, 1.0f);
+		//float t = 0.5f * (in.direction().y() + 1.0f);
+		//return (1.0f - t) * Color(1.0f, 1.0f, 1.0f) + t * Color(0.5f, 0.7f, 1.0f);
+		return Black;
 	}
 
 }
@@ -105,13 +139,14 @@ int main(void)
 {
 	float fov = 90.0f;
 	float aspect_ratio = (float)width / height;
+	int samples_per_pixel = 100;
 	Bitmap framebuff(width, height);
 	Point position;
 	Vec3 lookat, up(0.0f, 1.0f, 0.0f);
 
 	Scene scene;
 
-	switch (2)
+	switch (4)
 	{
 	case 0:
 	{
@@ -147,7 +182,27 @@ int main(void)
 		fov = 60.0f;
 
 		scene = two_sphere();
+		break;
+	}
+	case 3:
+	{
+		position = Point(26.0f, 3.0f, 6.0f);
+		lookat = Point(0.0f, 2.0f, 0.0f);
+		samples_per_pixel = 400;
+		fov = 60.0f;
 
+		scene = simple_light();
+		break;
+	}
+	case 4:
+	{
+		position = Point(278.0f, 278.0f, -800.0f);
+		lookat = Point(278.0f, 278.0f, 0.0f);
+		samples_per_pixel = 200;
+		fov = 60.0f;
+
+		scene = cornell_box();
+		break;
 	}
 	default:
 		break;
@@ -162,20 +217,20 @@ int main(void)
 	std::mutex progress_mutex;
 	int finish_line = 0;
 	
-	concurrency::parallel_for(0, width, [&framebuff, &scene, &camera, &buffer_mutex, &progress_mutex, &finish_line](int i)
+	concurrency::parallel_for(0, width, [&framebuff,&samples_per_pixel , &scene, &camera, &buffer_mutex, &progress_mutex, &finish_line](int i)
 		{
 			for (int j = 0; j < height; ++j)
 			{
 				float xoffset, yoffset;
 				Color color;
-				for (int k = 0; k < 100; k++)
+				for (int k = 0; k < samples_per_pixel; k++)
 				{
 					xoffset = random_float(), yoffset = random_float();
 					Ray ray = camera.sample(((float)i + xoffset) / width, ((float)j + yoffset) / height);
 					color += RayTrace(ray, scene, 50);
 				}
 
-				color /= 100.0f;
+				color /= (float)samples_per_pixel;
 				color ^= (1.0f / 2.2f);
 				{
 					std::lock_guard<std::mutex> lock(buffer_mutex);
