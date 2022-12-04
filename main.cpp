@@ -105,6 +105,9 @@ Scene cornell_box()
 	scene.addObject(std::make_shared<RectangleXZ>(0.0f, 555.0f, 0.0f, 555.0f, 555.0f, white));
 	scene.addObject(std::make_shared<RectangleXY>(0.0f, 555.0f, 0.0f, 555.0f, 555.0f, white));
 
+	scene.addObject(std::make_shared<Cuboid>(Point(130, 0, 65), Point(295, 165, 230), white));
+	scene.addObject(std::make_shared<Cuboid>(Point(265, 0, 295), Point(430, 330, 460), white));
+
 	return scene;
 }
 
@@ -199,7 +202,7 @@ int main(void)
 		position = Point(278.0f, 278.0f, -800.0f);
 		lookat = Point(278.0f, 278.0f, 0.0f);
 		samples_per_pixel = 200;
-		fov = 60.0f;
+		fov = 70.0f;
 
 		scene = cornell_box();
 		break;

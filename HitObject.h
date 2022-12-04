@@ -142,12 +142,6 @@ private:
 	float x0, x1, z0, z1, y;
 };
 
-class Cuboid : public RenderObject
-{
-private:
-
-};
-
 typedef std::pair<std::shared_ptr<RenderObject>, AABB> RenderObjectInfo;
 
 class BVHNode
@@ -188,6 +182,20 @@ public:
 private:
 	BVHTree _tree;
 	std::vector<std::shared_ptr<RenderObject>> _objects;
+};
+
+class Cuboid : public RenderObject
+{
+public:
+	explicit Cuboid(const Point& p1, const Point& p2, const std::shared_ptr<Material>& material);
+
+	bool hit(const Ray& ray, float min, float max, IntersectInfo& info) const override;
+	AABB createBox() const override;
+
+private:
+	Point _pmin;
+	Point _pmax;
+	Scene scene;
 };
 
 #endif

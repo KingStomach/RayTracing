@@ -1,7 +1,7 @@
 #ifndef _ARRAY3_H_
 #define _ARRAY3_H_
 
-#include<cmath>
+#include <cmath>
 #include <functional>
 #include <random>
 

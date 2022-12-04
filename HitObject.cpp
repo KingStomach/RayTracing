@@ -226,6 +226,32 @@ AABB RectangleXZ::createBox() const
 	return AABB(Point(x0, y - 0.001f, z0), Point(x1, y + 0.001f, z1));
 }
 
+Cuboid::Cuboid(const Point& p0, const Point& p1, const std::shared_ptr<Material>& material)
+	: _pmin(p0), _pmax(p1), RenderObject(material)
+{
+	scene.addObject(std::make_shared<RectangleXY>(p0.x(), p1.x(), p0.y(), p1.y(), p1.z(), material));
+	scene.addObject(std::make_shared<RectangleXY>(p0.x(), p1.x(), p0.y(), p1.y(), p0.z(), material));
+
+	scene.addObject(std::make_shared<RectangleXZ>(p0.x(), p1.x(), p0.z(), p1.z(), p1.y(), material));
+	scene.addObject(std::make_shared<RectangleXZ>(p0.x(), p1.x(), p0.z(), p1.z(), p0.y(), material));
+
+	scene.addObject(std::make_shared<RectangleYZ>(p0.y(), p1.y(), p0.z(), p1.z(), p1.x(), material));
+	scene.addObject(std::make_shared<RectangleYZ>(p0.y(), p1.y(), p0.z(), p1.z(), p0.x(), material));
+
+	scene.buildBVHTree();
+}
+
+bool Cuboid::hit(const Ray& ray, float min, float max, IntersectInfo& info) const
+{
+	std::shared_ptr<RenderObject> object;
+	return scene.hit(ray, min, max, info, object);
+}
+
+AABB Cuboid::createBox() const
+{
+	return AABB(_pmin, _pmax);
+}
+
 bool Scene::hit(const Ray& ray, float min, float max, IntersectInfo& info, std::shared_ptr<RenderObject>& object) const
 {
 	return _tree.hit(ray, min, max, info, object);
