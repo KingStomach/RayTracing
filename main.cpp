@@ -2,11 +2,10 @@
 #include <iostream>
 #include <ppl.h>
 
-#include "Array3.h"
 #include "HitObject.h"
 #include "Material.h"
+#include "Math.h"
 #include "Render.h"
-
 
 const int width = 512;
 const int height = 384;
@@ -29,14 +28,14 @@ Scene random_scene()
 
 				if (choose_mat < 0.8f) {
 					// diffuse
-					auto albedo = Color::random() * Color::random();
+					auto albedo = random_color() * random_color();
 					sphere_material = std::make_shared<Diffuse>(albedo);
 					//scene.addObject(std::make_shared<Sphere>(center, 0.2f, sphere_material));
 					scene.addObject(std::make_shared<MovingSphere>(center, 0.2f, sphere_material, Vec3(0.0f, random_float(0.0f, 0.5f), 0.0f)));
 				}
 				else if (choose_mat < 0.95f) {
 					// metal
-					auto albedo = Color::random(0.5f, 1.0f);
+					auto albedo = random_color(0.5f, 1.0f);
 					float fuzz = random_float(0.0f, 0.5f);
 					sphere_material = std::make_shared<Metal>(albedo, fuzz);
 					scene.addObject(std::make_shared<Sphere>(center, 0.2f, sphere_material));
@@ -131,9 +130,9 @@ Color RayTrace(const Ray& in,const Scene& scene, int depth)
 	}
 	else
 	{
-		//float t = 0.5f * (in.direction().y() + 1.0f);
-		//return (1.0f - t) * Color(1.0f, 1.0f, 1.0f) + t * Color(0.5f, 0.7f, 1.0f);
-		return Black;
+		float t = 0.5f * (in.direction().y + 1.0f);
+		return (1.0f - t) * Color(1.0f, 1.0f, 1.0f) + t * Color(0.5f, 0.7f, 1.0f);
+		//return Black;
 	}
 
 }
@@ -144,17 +143,17 @@ int main(void)
 	float aspect_ratio = (float)width / height;
 	int samples_per_pixel = 100;
 	Bitmap framebuff(width, height);
-	Point position;
-	Vec3 lookat, up(0.0f, 1.0f, 0.0f);
+	Point position, lookat;
+	Vec3 up(0.0f, 1.0f, 0.0f);
 
 	Scene scene;
 
-	switch (4)
+	switch (1)
 	{
 	case 0:
 	{
 		position = Point(0.0f, 0.0f, 1.0f);
-		lookat = Vec3(0.0f, 0.0f, -1.0f);
+		lookat = Point(0.0f, 0.0f, -1.0f);
 
 		auto material_ground = std::make_shared<Diffuse>(Color(0.8f, 0.8f, 0.0f));
 		auto material_center = std::make_shared<Diffuse>(Color(0.1f, 0.2f, 0.5f));
@@ -171,7 +170,7 @@ int main(void)
 	case 1:
 	{
 		position = Point(13.0f, 2.0f, 3.0f);
-		lookat = Vec3(0.0f, 0.0f, 0.0f);
+		lookat = Point(0.0f, 0.0f, 0.0f);
 		fov = 60.0f;
 
 		scene = random_scene();
@@ -181,7 +180,7 @@ int main(void)
 	case 2:
 	{
 		position = Point(13.0f, 2.0f, 3.0f);
-		lookat = Vec3(0.0f, 0.0f, 0.0f);
+		lookat = Point(0.0f, 0.0f, 0.0f);
 		fov = 60.0f;
 
 		scene = two_sphere();

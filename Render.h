@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "Array3.h"
+#include "Math.h"
 
 class Ray;
 
@@ -46,16 +46,16 @@ private:
     inline float clamp(float x) const { return std::min(std::max(x, 0.0f), 1.0f); }
     inline std::array<std::uint8_t, 3> toUint8RGB(const Color& color) {
         return std::array<std::uint8_t, 3>{
-            static_cast<std::uint8_t>(255.0 * clamp(color.b()) + 0.5),
-                static_cast<std::uint8_t>(255.0 * clamp(color.g()) + 0.5),
-                static_cast<std::uint8_t>(255.0 * clamp(color.r()) + 0.5) };
+            static_cast<std::uint8_t>(255.0 * clamp(color.b) + 0.5),
+                static_cast<std::uint8_t>(255.0 * clamp(color.g) + 0.5),
+                static_cast<std::uint8_t>(255.0 * clamp(color.r) + 0.5) };
     }
 };
 
 class Camera
 {
 public:
-    Camera(const Point& position, const Vec3& lookat, const Vec3& up, float fov, float aspect_ratio);
+    Camera(const Point& position, const Point& lookat, const Vec3& up, float fov, float aspect_ratio);
 
     inline Point position() const { return p; }
     inline void setLen(float aperture, float focus_dist) { this->lens_radius = aperture / 2.0f; this->focus_dist = focus_dist; }
@@ -64,7 +64,7 @@ public:
 
 private:
     Point p;
-    Vec3 lookat;
+    Point lookat;
     Vec3 up;
     float yoffset;
     float xoffset;

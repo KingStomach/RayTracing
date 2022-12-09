@@ -72,7 +72,7 @@ bool Bitmap::SaveFile(const std::string& path) const
     return true;
 }
 
-Camera::Camera(const Point& position, const Vec3& lookat, const Vec3& up, float fov, float aspect_ratio)
+Camera::Camera(const Point& position, const Point& lookat, const Vec3& up, float fov, float aspect_ratio)
     : p(position), lookat(lookat), up(up), yoffset(std::tan(fov * PI /360.0f)), xoffset(yoffset* aspect_ratio), lens_radius(0.0f), focus_dist(1.0f) {}
 
 Ray Camera::sample(float s, float v)
@@ -80,7 +80,7 @@ Ray Camera::sample(float s, float v)
     Vec3 front = lookat - p;
     front.normalize();
     Vec3 x = up.cross(front), y = up;
-    Vec3 lookat_sv = p + front + (s - 0.5f) * xoffset * x + (v - 0.5f) * yoffset * y;
+    Point lookat_sv = p + front + (s - 0.5f) * xoffset * x + (v - 0.5f) * yoffset * y;
     Vec3 dir = (lookat_sv - p).normalize();
     return Ray(p, dir, random_float(0.0, 0.5f));
 }

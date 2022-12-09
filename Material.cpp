@@ -8,14 +8,14 @@ Color CheckerTexture::sample(float u, float v) const
 
 bool Diffuse::scatter(const Vec3& in, const Vec3& normal, Vec3& out) const
 {
-	out = Vec3::random_hemisphere(normal);
+	out = random_hemisphere(normal);
 	return true;
 }
 
 bool Metal::scatter(const Vec3& in, const Vec3& normal, Vec3& out) const
 {
-	Vec3 reflect = Vec3::reflect(in, normal);
-	out = reflect + _fuzz * Vec3::random_sphere().normalize();
+	Vec3 dir = reflect(in, normal);
+	out = dir + _fuzz * random_sphere().normalize();
 	return out.Dot(normal) > 0;
 }
 
@@ -27,8 +27,8 @@ bool Dielectric::scatter(const Vec3& in, const Vec3& normal, Vec3& out) const
 	float sin_theta = std::sqrt(1.0f - cos_theta * cos_theta);
 	float refraction_ratio = isfront ? (1.0f / ir) : ir;
 	if (refraction_ratio * sin_theta > 1.0f || reflectance(cos_theta, refraction_ratio) > random_float())
-		out = Vec3::reflect(in, scatterNormal);
+		out = reflect(in, scatterNormal);
 	else
-		out = Vec3::refract(in, scatterNormal, refraction_ratio);
+		out = refract(in, scatterNormal, refraction_ratio);
 	return true;
 }

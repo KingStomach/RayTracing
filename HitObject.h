@@ -1,7 +1,7 @@
 #ifndef _HITOBJECT_H_
 #define _HITOBJECT_H_
 
-#include "Array3.h"
+#include "Math.h"
 
 class Material;
 class RenderObject;

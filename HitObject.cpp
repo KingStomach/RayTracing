@@ -21,8 +21,8 @@ bool AABB::hit(const Ray& ray, float min, float max) const
 
 AABB AABB::merge(const AABB& box) const
 {
-	Point pmin(std::min(_pmin.x(), box._pmin.x()), std::min(_pmin.y(), box._pmin.y()), std::min(_pmin.z(), box._pmin.z()));
-	Point pmax(std::max(_pmax.x(), box._pmax.x()), std::max(_pmax.y(), box._pmax.y()), std::max(_pmax.z(), box._pmax.z()));
+	Point pmin(std::min(_pmin.x, box._pmin.x), std::min(_pmin.y, box._pmin.y), std::min(_pmin.z, box._pmin.z));
+	Point pmax(std::max(_pmax.x, box._pmax.x), std::max(_pmax.y, box._pmax.y), std::max(_pmax.z, box._pmax.z));
 	return AABB(pmin, pmax);
 }
 
@@ -69,17 +69,17 @@ BVHNode BVHNode::buildBVHTree(std::vector<RenderObjectInfo>& objects, int left, 
 	case 0:
 		std::sort(objects.begin() + left, objects.begin() + right + 1,
 			[](const RenderObjectInfo& o1, const RenderObjectInfo& o2)->bool
-			{ return o1.second.center().x() < o2.second.center().x(); });
+			{ return o1.second.center().x < o2.second.center().x; });
 		break;
 	case 1:
 		std::sort(objects.begin() + left, objects.begin() + right + 1,
 			[](const RenderObjectInfo& o1, const RenderObjectInfo& o2)->bool
-			{ return o1.second.center().y() < o2.second.center().y(); });
+			{ return o1.second.center().y < o2.second.center().y; });
 		break;
 	case 2:
 		std::sort(objects.begin() + left, objects.begin() + right + 1,
 			[](const RenderObjectInfo& o1, const RenderObjectInfo& o2)->bool
-			{ return o1.second.center().z() < o2.second.center().z(); });
+			{ return o1.second.center().z < o2.second.center().z; });
 		break;
 	default:
 		break;
@@ -159,17 +159,17 @@ bool MovingSphere::hit(const Ray& ray, float min, float max, IntersectInfo& info
 
 bool RectangleXY::hit(const Ray& ray, float min, float max, IntersectInfo& info) const
 {
-	float t = (z - ray.origin().z()) / ray.direction().z();
+	float t = (z - ray.origin().z) / ray.direction().z;
 	if (t < min || t > max)
 		return false;
 
-	float x = ray.origin().x() + t * ray.direction().x();
-	float y = ray.origin().y() + t * ray.direction().y();
+	float x = ray.origin().x + t * ray.direction().x;
+	float y = ray.origin().y + t * ray.direction().y;
 	if (x < x0 || x > x1 || y < y0 || y > y1)
 		return false;
 
 	info.position = Point(x, y, z);
-	info.normal = ray.origin().z() > z ? Vec3(0.0f, 0.0f, 1.0f) : Vec3(0.0f, 0.0f, -1.0f);
+	info.normal = ray.origin().z > z ? Vec3(0.0f, 0.0f, 1.0f) : Vec3(0.0f, 0.0f, -1.0f);
 	info.u = (x - x0) / (x1 - x0);
 	info.v = (y - y0) / (y1 - y0);
 	return true;
@@ -182,17 +182,17 @@ AABB RectangleXY::createBox() const
 
 bool RectangleYZ::hit(const Ray& ray, float min, float max, IntersectInfo& info) const
 {
-	float t = (x - ray.origin().x()) / ray.direction().x();
+	float t = (x - ray.origin().x) / ray.direction().x;
 	if (t < min || t > max)
 		return false;
 
-	float y = ray.origin().y() + t * ray.direction().y();
-	float z = ray.origin().z() + t * ray.direction().z();
+	float y = ray.origin().y + t * ray.direction().y;
+	float z = ray.origin().z + t * ray.direction().z;
 	if (y < y0 || y > y1 || z < z0 || z > z1)
 		return false;
 
 	info.position = Point(x, y, z);
-	info.normal = ray.origin().x() > x ? Vec3(1.0f, 0.0f, 0.0f) : Vec3(-1.0f, 0.0f, 0.0f);
+	info.normal = ray.origin().x > x ? Vec3(1.0f, 0.0f, 0.0f) : Vec3(-1.0f, 0.0f, 0.0f);
 	info.u = (y - y0) / (y1 - y0);
 	info.v = (z - z0) / (z1 - z0);
 	return true;
@@ -205,17 +205,17 @@ AABB RectangleYZ::createBox() const
 
 bool RectangleXZ::hit(const Ray& ray, float min, float max, IntersectInfo& info) const
 {
-	float t = (y - ray.origin().y()) / ray.direction().y();
+	float t = (y - ray.origin().y) / ray.direction().y;
 	if (t < min || t > max)
 		return false;
 
-	float x = ray.origin().x() + t * ray.direction().x();
-	float z = ray.origin().z() + t * ray.direction().z();
+	float x = ray.origin().x + t * ray.direction().x;
+	float z = ray.origin().z + t * ray.direction().z;
 	if (x < x0 || x > x1 || z < z0 || z > z1)
 		return false;
 
 	info.position = Point(x, y, z);
-	info.normal = ray.origin().y() > y ? Vec3(0.0f, 1.0f, 0.0f) : Vec3(0.0f, -1.0f, 0.0f);
+	info.normal = ray.origin().y > y ? Vec3(0.0f, 1.0f, 0.0f) : Vec3(0.0f, -1.0f, 0.0f);
 	info.u = (x - x0) / (x1 - x0);
 	info.v = (z - z0) / (z1 - z0);
 	return true;
@@ -229,14 +229,14 @@ AABB RectangleXZ::createBox() const
 Cuboid::Cuboid(const Point& p0, const Point& p1, const std::shared_ptr<Material>& material)
 	: _pmin(p0), _pmax(p1), RenderObject(material)
 {
-	scene.addObject(std::make_shared<RectangleXY>(p0.x(), p1.x(), p0.y(), p1.y(), p1.z(), material));
-	scene.addObject(std::make_shared<RectangleXY>(p0.x(), p1.x(), p0.y(), p1.y(), p0.z(), material));
+	scene.addObject(std::make_shared<RectangleXY>(p0.x, p1.x, p0.y, p1.y, p1.z, material));
+	scene.addObject(std::make_shared<RectangleXY>(p0.x, p1.x, p0.y, p1.y, p0.z, material));
 
-	scene.addObject(std::make_shared<RectangleXZ>(p0.x(), p1.x(), p0.z(), p1.z(), p1.y(), material));
-	scene.addObject(std::make_shared<RectangleXZ>(p0.x(), p1.x(), p0.z(), p1.z(), p0.y(), material));
+	scene.addObject(std::make_shared<RectangleXZ>(p0.x, p1.x, p0.z, p1.z, p1.y, material));
+	scene.addObject(std::make_shared<RectangleXZ>(p0.x, p1.x, p0.z, p1.z, p0.y, material));
 
-	scene.addObject(std::make_shared<RectangleYZ>(p0.y(), p1.y(), p0.z(), p1.z(), p1.x(), material));
-	scene.addObject(std::make_shared<RectangleYZ>(p0.y(), p1.y(), p0.z(), p1.z(), p0.x(), material));
+	scene.addObject(std::make_shared<RectangleYZ>(p0.y, p1.y, p0.z, p1.z, p1.x, material));
+	scene.addObject(std::make_shared<RectangleYZ>(p0.y, p1.y, p0.z, p1.z, p0.x, material));
 
 	scene.buildBVHTree();
 }
