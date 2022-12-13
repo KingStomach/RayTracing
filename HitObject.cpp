@@ -26,6 +26,31 @@ AABB AABB::merge(const AABB& box) const
 	return AABB(pmin, pmax);
 }
 
+AABB AABB::transform(const Martix& m) const
+{
+	Point p[8];
+	p[0] = _pmin;
+	p[1] = Point(_pmax[0], _pmin[1], _pmin[2]);
+	p[2] = Point(_pmin[0], _pmax[1], _pmin[2]);
+	p[3] = Point(_pmin[0], _pmin[1], _pmax[2]);
+	p[4] = Point(_pmax[0], _pmax[1], _pmin[2]);
+	p[5] = Point(_pmax[0], _pmin[1], _pmax[2]);
+	p[6] = Point(_pmin[0], _pmax[1], _pmax[2]);
+	p[7] = _pmax;
+
+	Point min, max;
+	for (int i = 0; i < 8; i++)
+	{
+		p[i] = m * p[i];
+		for (int j = 0; j < 3; j++)
+		{
+			min[j] = std::min(p[i][j], min[j]);
+			max[j] = std::max(p[i][j], max[j]);
+		}
+	}
+	return AABB(min, max);
+}
+
 BVHNode::BVHNode(const std::vector<std::shared_ptr<RenderObject>>& objects)
 {
 	std::vector<RenderObjectInfo> array;
@@ -250,6 +275,25 @@ bool Cuboid::hit(const Ray& ray, float min, float max, IntersectInfo& info) cons
 AABB Cuboid::createBox() const
 {
 	return AABB(_pmin, _pmax);
+}
+
+bool Rotate_Y::hit(const Ray& ray, float min, float max, IntersectInfo& info) const
+{
+	Martix rotattion = rotate_y(-_angle);
+	Ray rotate_ray(rotattion * ray.origin(), rotattion * ray.direction(), ray.time());
+
+	if (!_object->hit(rotate_ray, min, max, info))
+		return false;
+
+	rotattion = rotate_y(_angle);
+	info.position = rotattion * info.position;
+	info.normal = rotattion * info.normal;
+}
+
+AABB Rotate_Y::createBox() const
+{
+	return _object->createBox().transform(rotate_y(_angle));
+
 }
 
 bool Scene::hit(const Ray& ray, float min, float max, IntersectInfo& info, std::shared_ptr<RenderObject>& object) const

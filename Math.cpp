@@ -1,5 +1,7 @@
 #include "Math.h"
 
+const float tolerance = 0.001f;
+
 const Color White(1.0f, 1.0f, 1.0f);
 const Color Black(0.0f, 0.0f, 0.0f);
 const Color Red(1.0f, 0.0f, 0.0f);
@@ -58,4 +60,16 @@ Vec3 refract(const Vec3& in, const Vec3& normal, float ir_ratio)
 	Vec3 vertical = -cos_theta2 * normal;
 	Vec3 horizontal = sin_theta2 * (in + cos_theta1 * normal).normalize();
 	return vertical + horizontal;
+}
+
+Martix rotate_y(float angle)
+{
+	Martix m;
+	float cos_theta = std::cos(angle * PI / 180.0);
+	float sin_theta = std::sin(angle * PI / 180.0);
+	m[0][0] = m[2][2] = cos_theta;
+	m[0][2] = sin_theta;
+	m[2][0] = -sin_theta;
+	m[1][1] = 1.0f;
+	return m;
 }

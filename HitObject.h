@@ -46,6 +46,7 @@ public:
 
 	bool hit(const Ray& ray, float min, float max) const override;
 	Point center() const override { return _pmin + (_pmax - _pmin) * 0.5f; }
+	AABB transform(const Martix& m) const;
 
 	AABB merge(const AABB& box) const;
 
@@ -196,6 +197,19 @@ private:
 	Point _pmin;
 	Point _pmax;
 	Scene scene;
+};
+
+class Rotate_Y : public RenderObject
+{
+public:
+	explicit Rotate_Y(const std::shared_ptr<RenderObject>& object, float angle) : _object(object), _angle(angle), RenderObject(object->material()) {}
+
+	bool hit(const Ray& ray, float min, float max, IntersectInfo& info) const override;
+	AABB createBox() const override;
+
+private:
+	std::shared_ptr<RenderObject> _object;
+	float _angle;
 };
 
 #endif

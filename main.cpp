@@ -97,15 +97,17 @@ Scene cornell_box()
 	auto green = std::make_shared<Diffuse>(Color(0.12f, 0.45f, 0.15f));
 	auto light = std::make_shared<Emissive>(Color(15.0f, 15.0f, 15.0f));
 
-	scene.addObject(std::make_shared<RectangleYZ>(0.0f, 555.0f, 0.0f, 555.0f, 555.0f, green));
-	scene.addObject(std::make_shared<RectangleYZ>(0.0f, 555.0f, 0.0f, 555.0f, 0.0f, red));
+	scene.addObject(std::make_shared<RectangleYZ>(0.0f, 555.0f, 0.0f, 555.0f, 555.0f, red));
+	scene.addObject(std::make_shared<RectangleYZ>(0.0f, 555.0f, 0.0f, 555.0f, 0.0f, green));
 	scene.addObject(std::make_shared<RectangleXZ>(213.0f, 343.0f, 227.0f, 332.0f, 554.0f, light));
 	scene.addObject(std::make_shared<RectangleXZ>(0.0f, 555.0f, 0.0f, 555.0f, 0.0f, white));
 	scene.addObject(std::make_shared<RectangleXZ>(0.0f, 555.0f, 0.0f, 555.0f, 555.0f, white));
 	scene.addObject(std::make_shared<RectangleXY>(0.0f, 555.0f, 0.0f, 555.0f, 555.0f, white));
 
-	scene.addObject(std::make_shared<Cuboid>(Point(130, 0, 65), Point(295, 165, 230), white));
-	scene.addObject(std::make_shared<Cuboid>(Point(265, 0, 295), Point(430, 330, 460), white));
+	auto box1 = std::make_shared<Cuboid>(Point(210.0f, 0.0f, 165.0f), Point(375.0f, 165.0f, 330.0f), white);
+	auto box2 = std::make_shared<Cuboid>(Point(175.0f, 0.0f, 220.0f), Point(340.0f, 330.0f, 385.0f), white);
+	scene.addObject(std::make_shared<Rotate_Y>(box1, 18));
+	scene.addObject(std::make_shared<Rotate_Y>(box2, -15));
 
 	return scene;
 }
@@ -130,9 +132,9 @@ Color RayTrace(const Ray& in,const Scene& scene, int depth)
 	}
 	else
 	{
-		float t = 0.5f * (in.direction().y + 1.0f);
-		return (1.0f - t) * Color(1.0f, 1.0f, 1.0f) + t * Color(0.5f, 0.7f, 1.0f);
-		//return Black;
+		//float t = 0.5f * (in.direction().y + 1.0f);
+		//return (1.0f - t) * Color(1.0f, 1.0f, 1.0f) + t * Color(0.5f, 0.7f, 1.0f);
+		return Black;
 	}
 
 }
@@ -148,7 +150,7 @@ int main(void)
 
 	Scene scene;
 
-	switch (1)
+	switch (4)
 	{
 	case 0:
 	{
@@ -201,7 +203,7 @@ int main(void)
 		position = Point(278.0f, 278.0f, -800.0f);
 		lookat = Point(278.0f, 278.0f, 0.0f);
 		samples_per_pixel = 200;
-		fov = 70.0f;
+		fov = 75.0f;
 
 		scene = cornell_box();
 		break;

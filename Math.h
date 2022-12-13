@@ -7,6 +7,8 @@
 
 #define PI 3.1415926f
 
+extern const float tolerance;
+
 class Vec3
 {
 public:
@@ -16,6 +18,7 @@ public:
 	Vec3 operator+(const Vec3& v) const { return Vec3(x + v.x, y + v.y, z + v.z); }
 	Vec3 operator+=(const Vec3& v) { x += v.x; y += v.y; z += v.z; return *this; }
 	Vec3 operator-(const Vec3& v) const { return Vec3(x - v.x, y - v.y, z - v.z); }
+	Vec3 operator-=(const Vec3& v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
 	Vec3 operator-() const { return Vec3(-x, -y, -z); }
 	Vec3 operator*(const Vec3& v) const { return Vec3(x * v.x, y * v.y, z * v.z); }
 	Vec3 operator*(float k) const { return Vec3(x * k, y * k, z * k); }
@@ -31,8 +34,8 @@ public:
 	Vec3 cross(const Vec3& v) const { return Vec3(y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x); }
 	float length() const { return std::sqrt(this->Dot(*this)); }
 
-	inline float operator[](int i) const { return data[i]; }
-	inline float& operator[](int i) { return data[i]; }
+	float operator[](int i) const { return data[i]; }
+	float& operator[](int i) { return data[i]; }
 
 	union
 	{
@@ -54,8 +57,8 @@ public:
 	Point operator-=(const Vec3& v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
 	Vec3 operator-(const Point& p) const { return Vec3(x - p.x, y - p.y, z - p.z); }
 
-	inline float operator[](int i) const { return data[i]; }
-	inline float& operator[](int i) { return data[i]; }
+	float operator[](int i) const { return data[i]; }
+	float& operator[](int i) { return data[i]; }
 
 	union
 	{
@@ -83,14 +86,34 @@ public:
 	Color operator^(float k) const { return Color(std::pow(r, k), std::pow(g, k), std::pow(b, k)); }
 	Color operator^=(float k) { r = std::pow(r, k), g = std::pow(g, k), b = std::pow(b, k); return *this; }
 
-	inline float operator[](int i) const { return data[i]; }
-	inline float& operator[](int i) { return data[i]; }
+	float operator[](int i) const { return data[i]; }
+	float& operator[](int i) { return data[i]; }
 
 	union
 	{
 		float data[3];
 		struct { float r, g, b; };
 	};
+};
+
+class Martix
+{
+public:
+	explicit Martix() {}
+	explicit Martix(const Vec3& row1, const Vec3& row2, const Vec3& row3) : data{ row1,row2,row3 } {}
+
+	Martix operator+(const Martix& m) const { return Martix(data[0] + m[0], data[1] + m[1], data[2] + m[2]); }
+	Martix operator+=(const Martix& m) { data[0] += m[0]; data[1] += m[1]; data[2] += m[2]; return *this; }
+	Martix operator-(const Martix& m) const { return Martix(data[0] - m[0], data[1] - m[1], data[2] - m[2]); }
+	Martix operator-=(const Martix& m) { data[0] -= m[0]; data[1] -= m[1]; data[2] += m[2]; return *this; }
+	Vec3 operator*(const Vec3& v) const { return Vec3(data[0].Dot(v), data[1].Dot(v), data[2].Dot(v)); }
+	Point operator*(const Point& p) const { Vec3 v(p[0], p[1], p[2]); return Point(data[0].Dot(v), data[1].Dot(v), data[2].Dot(v)); }
+
+	Vec3 operator[](int i) const { return data[i]; }
+	Vec3& operator[](int i) { return data[i]; }
+
+private:
+	Vec3 data[3];
 };
 
 float random_float(float min = 0.0f, float max = 1.0f);
@@ -101,6 +124,7 @@ Vec3 random_unit_disk();
 Color random_color(float min = 0.0f, float max = 1.0f);
 Vec3 reflect(const Vec3& in, const Vec3& normal);
 Vec3 refract(const Vec3& in, const Vec3& normal, float ir_ratio);
+Martix rotate_y(float angle);
 
 extern const Color White;
 extern const Color Black;
