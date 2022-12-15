@@ -7,8 +7,8 @@
 #include "Math.h"
 #include "Render.h"
 
-const int width = 512;
-const int height = 384;
+const int width = 500;
+const int height = 500;
 
 Scene random_scene()
 {
@@ -144,6 +144,7 @@ int main(void)
 	float fov = 90.0f;
 	float aspect_ratio = (float)width / height;
 	int samples_per_pixel = 100;
+	int recursion_depth = 50;
 	Bitmap framebuff(width, height);
 	Point position, lookat;
 	Vec3 up(0.0f, 1.0f, 0.0f);
@@ -165,6 +166,7 @@ int main(void)
 		scene.addObject(std::make_shared<Sphere>(Point(0.0f, -100.5f, -1.0f), 100.0f, material_ground));
 		scene.addObject(std::make_shared<Sphere>(Point(0.0f, 0.0f, -1.0f), 0.5f, material_center));
 		scene.addObject(std::make_shared<Sphere>(Point(1.0f, 0.0f, -1.0f), 0.5f, material_left));
+		scene.addObject(std::make_shared<Sphere>(Point(1.0f, 0.0f, -1.0f), -0.45f, material_left));
 		scene.addObject(std::make_shared<Sphere>(Point(-1.0f, 0.0f, -1.0f), 0.5f, material_right));
 
 		break;
@@ -202,7 +204,8 @@ int main(void)
 	{
 		position = Point(278.0f, 278.0f, -800.0f);
 		lookat = Point(278.0f, 278.0f, 0.0f);
-		samples_per_pixel = 200;
+		samples_per_pixel = 400;
+		recursion_depth = 100;
 		fov = 75.0f;
 
 		scene = cornell_box();
@@ -221,7 +224,7 @@ int main(void)
 	std::mutex progress_mutex;
 	int finish_line = 0;
 	
-	concurrency::parallel_for(0, width, [&framebuff,&samples_per_pixel , &scene, &camera, &buffer_mutex, &progress_mutex, &finish_line](int i)
+	concurrency::parallel_for(0, width, [&](int i)
 		{
 			for (int j = 0; j < height; ++j)
 			{
@@ -231,7 +234,7 @@ int main(void)
 				{
 					xoffset = random_float(), yoffset = random_float();
 					Ray ray = camera.sample(((float)i + xoffset) / width, ((float)j + yoffset) / height);
-					color += RayTrace(ray, scene, 50);
+					color += RayTrace(ray, scene, recursion_depth);
 				}
 
 				color /= (float)samples_per_pixel;

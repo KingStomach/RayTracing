@@ -136,7 +136,7 @@ bool Sphere::hit(const Ray& ray, float min, float max, IntersectInfo& info) cons
 		return false;
 
 	info.position = ray.at(t1);
-	info.normal = (info.position - center()).normalize();
+	info.normal = (info.position - center()) / radius();
 	auto uv = getUV(info.normal);
 	info.u = uv.first;
 	info.v = uv.second;
@@ -145,7 +145,8 @@ bool Sphere::hit(const Ray& ray, float min, float max, IntersectInfo& info) cons
 
 AABB Sphere::createBox() const
 {
-	Vec3 dir(_radius, _radius, _radius);
+	float r = std::abs(_radius);
+	Vec3 dir(r, r, r);
 	return AABB(_center - dir, _center + dir);
 }
 
@@ -175,11 +176,19 @@ bool MovingSphere::hit(const Ray& ray, float min, float max, IntersectInfo& info
 		return false;
 
 	info.position = ray.at(t1);
-	info.normal = (info.position - center(ray.time())).normalize();
+	info.normal = (info.position - center(ray.time())) / radius();
 	auto uv = getUV(info.normal);
 	info.u = uv.first;
 	info.v = uv.second;
 	return true;
+}
+
+AABB MovingSphere::createBox() const
+{
+	float r = std::abs(_radius);
+	Vec3 dir(r, r, r);
+	Point center1 = center(_start_time), center2 = center(_end_time);
+	return AABB(center1 - dir, center1 + dir).merge(AABB(center2 - dir, center2 + dir));
 }
 
 bool RectangleXY::hit(const Ray& ray, float min, float max, IntersectInfo& info) const

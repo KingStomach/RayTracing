@@ -93,15 +93,18 @@ protected:
 class MovingSphere : public Sphere
 {
 public:
-	explicit MovingSphere(const Point& center, float radius, const std::shared_ptr<Material>& material, const Vec3& velocity, float time = 0.0f)
-		: Sphere(center, radius, material), _velocity(velocity) {}
+	explicit MovingSphere(const Point& center, float radius, const std::shared_ptr<Material>& material, const Vec3& velocity, float start_time = 0.0f, float end_time = 1.0f)
+		: Sphere(center, radius, material), _velocity(velocity), _start_time(start_time), _end_time(end_time) {}
 
 	bool hit(const Ray& ray, float min, float max, IntersectInfo& info) const override;
+	AABB createBox() const override;
 
 	Point center(float time) const { return _center + _velocity * time; }
 
 private:
 	Vec3 _velocity;
+	float _start_time;
+	float _end_time;
 };
 
 class RectangleXY : public RenderObject
